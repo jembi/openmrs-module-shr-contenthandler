@@ -39,34 +39,34 @@ public interface ContentHandlerService extends OpenmrsService {
 	 * @should Return the default handler (UnstructuredDataHandler) for an unknown content type
 	 * @should Never return null
 	 */
-    ContentHandler getContentHandler(String contentType);
+	ContentHandler getContentHandler(String contentType);
  
-    /**
-     * Register a content handler for a specified content type.
-     * <p>
-     * The content handler service follows the prototype design pattern for instantiating handlers.
-     * Therefore a content handler instance has to be provided. This instance will be cloned for callers
-     * of the {@link #getContentHandler(String)} method.
-     * <p>
-     * This method should be called by processor modules on startup.
-     * 
-     * @throws AlreadyRegisteredException if a handler is already registered for a specified content type
-     * @throws InvalidContentTypeException if an invalid content type is specified
-     * @should Register the specified handler for the specified content type
-     * @should Throw an AlreadyRegisteredException if a handler is already registered for a specified content type
-     * @should Throw an InvalidContentTypeException if an invalid content type is specified
-     * @should Throw a NullPointerException if prototype is null
-     */
-    void registerContentHandler(String contentType, ContentHandler prototype) throws AlreadyRegisteredException, InvalidContentTypeException;
+	/**
+	 * Register a content handler for a specified content type.
+	 * <p>
+	 * The content handler service follows the prototype design pattern for instantiating handlers.
+	 * Therefore a content handler instance has to be provided. This instance will be cloned for callers
+	 * of the {@link #getContentHandler(String)} method.
+	 * <p>
+	 * This method should be called by processor modules on startup.
+	 * 
+	 * @throws AlreadyRegisteredException if a handler is already registered for a specified content type
+	 * @throws InvalidContentTypeException if an invalid content type is specified
+	 * @should Register the specified handler for the specified content type
+	 * @should Throw an AlreadyRegisteredException if a handler is already registered for a specified content type
+	 * @should Throw an InvalidContentTypeException if an invalid content type is specified
+	 * @should Throw a NullPointerException if prototype is null
+	 */
+	void registerContentHandler(String contentType, ContentHandler prototype) throws AlreadyRegisteredException, InvalidContentTypeException;
     
-    /**
-     * Deregister the current handler assigned for the specified content type.
-     * <p>
-     * This method should be called by processor modules on shutdown.
-     * 
-     * @should Deregister the handler assigned for to specified contentType
-     * @should Do nothing if there is no handler assigned for a specified contentType
-     * @should Do nothing if there is an invalid content type specified
-     */
-    void deregisterContentHandler(String contentType);
+	/**
+	 * Deregister the current handler assigned for the specified content type.
+	 * <p>
+	 * This method should be called by processor modules on shutdown.
+	 * 
+	 * @should Deregister the handler assigned for to specified contentType
+	 * @should Do nothing if there is no handler assigned for a specified contentType
+	 * @should Do nothing if there is an invalid content type specified
+	 */
+	void deregisterContentHandler(String contentType);
 }

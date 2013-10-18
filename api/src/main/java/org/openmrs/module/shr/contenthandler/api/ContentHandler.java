@@ -51,27 +51,27 @@ public interface ContentHandler {
 	 * @param documentUniqueId The unique document identifier
 	 * @param content The raw payload
 	 */
-    void saveContent(Patient patient, String documentUniqueId, String content);
+	void saveContent(Patient patient, String documentUniqueId, String content);
  
-    /**
+	/**
      * Retrieve the content associated with the specified document id.
      * 
 	 * @param documentUniqueId The unique document identifier
-     * @return The content in the content handler's format
+	 * @return The content in the content handler's format
      */
-    String fetchDocument(String documentUniqueId);
+	String fetchDocument(String documentUniqueId);
     
-    /**
-     * Retrieve a list of formatted encounters for a specified patient.
-     * 
+	/**
+	 * Retrieve a list of formatted encounters for a specified patient.
+	 * 
 	 * @param patient The patient associated with the content
-     * @param from The earliest encounter time to search for (inclusive)
-     * @param to The latest encounter time to search for (inclusive)
-     * @return A list of encounters in the content handler's format
-     */
-    List<String> queryEncounters(Patient patient, Date from, Date to);
+	 * @param from The earliest encounter time to search for (inclusive)
+	 * @param to The latest encounter time to search for (inclusive)
+	 * @return A list of encounters in the content handler's format
+	 */
+	List<String> queryEncounters(Patient patient, Date from, Date to);
  
-    /**
+	/**
      * Create a clone of this handler.
      * <p>
      * Note that this method allows a content handler to return itself as an instance (i.e. {@code return this;}).
@@ -79,5 +79,5 @@ public interface ContentHandler {
      * 
      * @return A clone of this handler
      */
-    ContentHandler cloneHandler();
+	ContentHandler cloneHandler();
 }
