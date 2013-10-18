@@ -1,6 +1,7 @@
 package org.openmrs.module.shr.contenthandler;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.openmrs.Patient;
@@ -18,19 +19,19 @@ public class UnstructuredDataHandler implements ContentHandler {
 	}
 
 	@Override
-	public void saveContent(Patient patient, String documentId, String content) {
+	public void saveContent(Patient patient, String documentUniqueId, String content) {
 		//TODO
 		throw new NotImplementedException();
 	}
 
 	@Override
-	public String fetchDocument(String documentId) {
+	public String fetchDocument(String documentUniqueId) {
 		//TODO
 		throw new NotImplementedException();
 	}
 
 	@Override
-	public String queryEncounters(Patient patient, Date from, Date to) {
+	public List<String> queryEncounters(Patient patient, Date from, Date to) {
 		//TODO
 		throw new NotImplementedException();
 	}

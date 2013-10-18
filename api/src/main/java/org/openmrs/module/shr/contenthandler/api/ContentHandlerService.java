@@ -43,11 +43,11 @@ public interface ContentHandlerService extends OpenmrsService {
  
     /**
      * Register a content handler for a specified content type.
-     * 
+     * <p>
      * The content handler service follows the prototype design pattern for instantiating handlers.
      * Therefore a content handler instance has to be provided. This instance will be cloned for callers
      * of the {@link #getContentHandler(String)} method.
-     * 
+     * <p>
      * This method should be called by processor modules on startup.
      * 
      * @throws AlreadyRegisteredException if a handler is already registered for a specified content type
@@ -61,6 +61,8 @@ public interface ContentHandlerService extends OpenmrsService {
     
     /**
      * Deregister the current handler assigned for the specified content type.
+     * <p>
+     * This method should be called by processor modules on shutdown.
      * 
      * @should Deregister the handler assigned for to specified contentType
      * @should Do nothing if there is no handler assigned for a specified contentType
