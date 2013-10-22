@@ -66,7 +66,7 @@ public interface ContentHandler {
 	 * 
 	 * @param patient The patient associated with the content
 	 * @param from The earliest encounter time to search for (inclusive)
-	 * @param to The latest encounter time to search for (inclusive)
+	 * @param to The latest encounter time to search for (exclusive)
 	 * @return A list of encounters in the content handler's format
 	 */
 	List<String> queryEncounters(Patient patient, Date from, Date to);

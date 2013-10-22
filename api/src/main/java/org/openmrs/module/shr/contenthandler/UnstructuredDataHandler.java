@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.NotImplementedException;
@@ -27,12 +28,12 @@ import org.openmrs.obs.ComplexData;
  */
 public class UnstructuredDataHandler implements ContentHandler {
 	
-	private static final String UNSTRUCTURED_ATTACHMENT_CONCEPT = "Unstructured Attachment";
-	private static final String UNSTRUCTURED_DATA_ENCOUNTER_TYPE = "Unstructured Data";
-	private static final String NULL_PROVIDER_ID = "Null-Provider";
+	protected static final String UNSTRUCTURED_ATTACHMENT_CONCEPT = "Unstructured Attachment";
+	protected static final String UNSTRUCTURED_DATA_ENCOUNTER_TYPE = "Unstructured Data";
+	protected static final String NULL_PROVIDER_ID = "Null-Provider";
 	
-	private static final String ENCOUNTERROLE_UUID_GLOBAL_PROP = "shr.contenthandler.encounterrole.uuid";
-	private static final String UNSTRUCTURED_DATA_HANDLER_GLOBAL_PROP = "shr.contenthandler.unstructureddatahandler.key";
+	protected static final String ENCOUNTERROLE_UUID_GLOBAL_PROP = "shr.contenthandler.encounterrole.uuid";
+	protected static final String UNSTRUCTURED_DATA_HANDLER_GLOBAL_PROP = "shr.contenthandler.unstructureddatahandler.key";
 	
 	private String contentType;
 	
@@ -40,11 +41,17 @@ public class UnstructuredDataHandler implements ContentHandler {
 		this.contentType = contentType;
 	}
 
+	/**
+	 * @see ContentHandler#saveContent(Patient, String)
+	 */
 	@Override
 	public void saveContent(Patient patient, String content) {
 		Context.getEncounterService().saveEncounter( createEncounter(patient, content) );
 	}
 
+	/**
+	 * @see ContentHandler#saveContent(Patient, String, String)
+	 */
 	@Override
 	public void saveContent(Patient patient, String documentUniqueId, String content) {
 		Encounter enc = createEncounter(patient, content);
@@ -55,7 +62,12 @@ public class UnstructuredDataHandler implements ContentHandler {
 		Context.getEncounterService().saveEncounter(enc);
 	}
 	
-	private Encounter createEncounter(Patient patient, String content) {
+	/**
+	 * Create a new encounter object with a complex obs for storing the specified content. 
+	 * @should create a new encounter object using the current time
+	 * @should contain a complex obs containing the content
+	 */
+	protected Encounter createEncounter(Patient patient, String content) {
 		Encounter enc = new Encounter();
 		
 		enc.setEncounterType(getUnstructuredDataEncounterType());
@@ -92,13 +104,11 @@ public class UnstructuredDataHandler implements ContentHandler {
 	private Concept createUnstructuredAttachmentConcept() {
 		ConceptService cs = Context.getConceptService();
 		ConceptComplex c = new ConceptComplex();
-		ConceptName cn = new ConceptName();
-		ConceptDescription cd = new ConceptDescription();
+		ConceptName cn = new ConceptName(UNSTRUCTURED_ATTACHMENT_CONCEPT, Locale.ENGLISH);
+		ConceptDescription cd = new ConceptDescription("Represents a generic unstructured data attachment", Locale.ENGLISH);
 		
-		cn.setName(UNSTRUCTURED_ATTACHMENT_CONCEPT);
 		c.setFullySpecifiedName(cn);
 		c.setPreferredName(cn);
-		cd.setDescription("Represents a generic unstructured data attachment");
 		c.addDescription(cd);
 		c.setDatatype(cs.getConceptDatatypeByName("Complex"));
 		c.setConceptClass(cs.getConceptClassByName("Misc"));
@@ -151,12 +161,18 @@ public class UnstructuredDataHandler implements ContentHandler {
 	}
 	
 
+	/**
+	 * @see ContentHandler#fetchDocument(String)
+	 */
 	@Override
 	public String fetchDocument(String documentUniqueId) {
 		//TODO
 		throw new NotImplementedException();
 	}
 
+	/**
+	 * @see ContentHandler#queryEncounters(Patient, Date, Date)
+	 */
 	@Override
 	public List<String> queryEncounters(Patient patient, Date from, Date to) {
 		List<Encounter> encs = Context.getEncounterService().getEncounters(
