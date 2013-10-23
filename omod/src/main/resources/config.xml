@@ -21,12 +21,12 @@
 	
 	<!-- Global props -->
 	<globalProperty>
-        <property>shr.contenthandler.unstructureddatahandler.key</property>
-        <defaultValue>UnstructuredDataHandler</defaultValue>
-        <description>
-        	The complex obs handler to use for unstructured data.
-        </description>
-    </globalProperty>
+		<property>shr.contenthandler.unstructureddatahandler.key</property>
+		<defaultValue>UnstructuredDataHandler</defaultValue>
+		<description>
+			The complex obs handler to use for unstructured data.
+		</description>
+	</globalProperty>
 	<!-- / Global props -->
 	
 	<!-- Adds link to admin page -->
