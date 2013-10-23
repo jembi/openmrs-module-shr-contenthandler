@@ -16,7 +16,11 @@ package org.openmrs.module.shr.contenthandler.api;
 import java.util.Date;
 import java.util.List;
 
+import org.openmrs.Encounter;
+import org.openmrs.EncounterRole;
+import org.openmrs.EncounterType;
 import org.openmrs.Patient;
+import org.openmrs.Provider;
 
 /**
  * A content handler provides an implementation for storing and retrieving patient encounter data in a particular format.
@@ -33,33 +37,29 @@ import org.openmrs.Patient;
 public interface ContentHandler {
 
 	/**
-	 * Parse and store clinical content for the specified patient.
+	 * Parse and store clinical content for the specified patient. Binary data should be sent base64 encoded.
 	 * 
 	 * @param patient The patient associated with the content
 	 * @param content The raw payload
+	 * @return The created and saved encounter object
 	 */
-	void saveContent(Patient patient, String content);
+	Encounter saveContent(Patient patient, Provider provider, EncounterRole role, EncounterType encounterType, Content content);
 
 	/**
-	 * Parse and store clinical content for the specified patient.
-	 * <p>
-	 * The stored content must be linked to the specified document identifier
-	 * such that the content can be retrieved using this identifier.
+	 * Retrieve the content associated with the specified encounter uuid.
 	 * 
-	 * @see #fetchDocument(String)
-	 * @param patient The patient associated with the content
-	 * @param documentUniqueId The unique document identifier
-	 * @param content The raw payload
-	 */
-	void saveContent(Patient patient, String documentUniqueId, String content);
-
-	/**
-	 * Retrieve the content associated with the specified document id.
-	 * 
-	 * @param documentUniqueId The unique document identifier
+	 * @param encounterUuid The encounter identifier
 	 * @return The content in the content handler's format
 	 */
-	String fetchDocument(String documentUniqueId);
+	Content fetchDocument(String encounterUuid);
+
+	/**
+	 * Retrieve the content associated with the specified encounter uuid.
+	 * 
+	 * @param encounterUuid The encounter identifier
+	 * @return The content in the content handler's format
+	 */
+	Content fetchDocument(int encounterId);
 
 	/**
 	 * Retrieve a list of formatted encounters for a specified patient.
@@ -69,7 +69,7 @@ public interface ContentHandler {
 	 * @param to The latest encounter time to search for (exclusive)
 	 * @return A list of encounters in the content handler's format
 	 */
-	List<String> queryEncounters(Patient patient, Date from, Date to);
+	List<Content> queryEncounters(Patient patient, Date from, Date to);
 
 	/**
 	 * Create a clone of this handler.

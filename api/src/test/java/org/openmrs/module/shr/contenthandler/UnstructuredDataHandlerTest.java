@@ -25,9 +25,12 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	@Test
 	public void createEncounter_shouldContainAComplexObsContainingTheContent()
 			throws Exception {
+		fail("This fails! oh no!");
+		
 		UnstructuredDataHandler handler = new UnstructuredDataHandler("text/plain");
 		Patient p = mock(Patient.class);
-		Encounter res = handler.createEncounter(p, TEST_CONTENT);
+		//FIXME
+		Encounter res = handler.createEncounter(p, null, null, null, null);
 		Set<Obs> obs = res.getAllObs();
 		
 		assertNotNull(obs);
@@ -46,10 +49,13 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	@Test
 	public void createEncounter_shouldCreateANewEncounterObjectUsingTheCurrentTime()
 			throws Exception {
+		fail("This fails! oh no!");
+		
 		UnstructuredDataHandler handler = new UnstructuredDataHandler("text/plain");
 		Patient p = mock(Patient.class);
 		Date beforeSaveTime = new Date();
-		Encounter res = handler.createEncounter(p, TEST_CONTENT);
+		//FIXME
+		Encounter res = handler.createEncounter(p, null, null, null, null);
 		
 		assertNotNull(res);
 		
