@@ -70,6 +70,17 @@ public interface ContentHandler {
 	 * @return A list of encounters in the content handler's format
 	 */
 	List<Content> queryEncounters(Patient patient, Date from, Date to);
+	
+	/**
+	 * Retrieve a list of formatted encounters for a specified patient.
+	 * 
+	 * @param patient The patient associated with the content
+	 * @param encounterTypes A list of encounter types to search for
+	 * @param from The earliest encounter time to search for (inclusive)
+	 * @param to The latest encounter time to search for (exclusive)
+	 * @return A list of encounters in the content handler's format
+	 */
+	List<Content> queryEncounters(Patient patient, List<EncounterType> encounterTypes, Date from, Date to);
 
 	/**
 	 * Create a clone of this handler.

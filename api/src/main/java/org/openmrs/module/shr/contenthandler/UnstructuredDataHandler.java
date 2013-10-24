@@ -141,8 +141,16 @@ public class UnstructuredDataHandler implements ContentHandler {
 	 */
 	@Override
 	public List<Content> queryEncounters(Patient patient, Date from, Date to) {
+		return queryEncounters(patient, null, from, to);
+	}
+
+	/**
+	 * @see ContentHandler#queryEncounters(Patient, EncounterType, Date, Date)
+	 */
+	@Override
+	public List<Content> queryEncounters(Patient patient, List<EncounterType> encounterTypes, Date from, Date to) {
 		List<Encounter> encs = Context.getEncounterService().getEncounters(
-			patient, null, from, to, null, null, null, null, null, false
+			patient, null, from, to, null, encounterTypes, null, null, null, false
 			);
 		if (encs==null || encs.isEmpty())
 			return Collections.emptyList();
