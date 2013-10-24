@@ -48,6 +48,7 @@ public final class Content implements Serializable {
 	}
 	
 	private final String payload;
+	private final String formatCode;
 	private final String contentType;
 	private final String encoding;
 	private final Representation representation;
@@ -61,8 +62,8 @@ public final class Content implements Serializable {
 	 * 
 	 * @see #Content(String, boolean, String, String, Representation, CompressionFormat, Locale)
 	 */
-	public Content(String payload, String contentType) {
-		this(payload, false, contentType, null, Representation.TXT, null, null);
+	public Content(String payload, String formatCode, String contentType) {
+		this(payload, false, formatCode, contentType, null, Representation.TXT, null, null);
 	}
 	
 	/**
@@ -70,14 +71,16 @@ public final class Content implements Serializable {
 	 * 
 	 * @param payload			The payload can either contain the content or a url referencing the content's location
 	 * @param payloadIsUrl		The payload contains a URL string referencing a location where the content can be retrieved from
+	 * @param formatCode		The content format code
 	 * @param contentType		The content MIME type
 	 * @param encoding			(Nullable) The character set used for the content
 	 * @param representation	Indicates that the content is either text or base64 encoded
 	 * @param compressionFormat (Nullable) The compression algorithm used by the content
 	 * @param language			(Nullable) The content language
 	 */
-	public Content(String payload, boolean payloadIsUrl, String contentType, String encoding, Representation representation, CompressionFormat compressionFormat, Locale language) {
+	public Content(String payload, boolean payloadIsUrl, String formatCode, String contentType, String encoding, Representation representation, CompressionFormat compressionFormat, Locale language) {
 		this.payload = payload;
+		this.formatCode = formatCode;
 		this.contentType = contentType;
 		this.encoding = encoding;
 		this.representation = representation;
@@ -94,6 +97,10 @@ public final class Content implements Serializable {
 	public byte[] getUncompressedPayload() {
 		//TODO
 		throw new NotImplementedException();
+	}
+	
+	public String getFormatCode() {
+		return formatCode;
 	}
 	
 	public String getContentType() {

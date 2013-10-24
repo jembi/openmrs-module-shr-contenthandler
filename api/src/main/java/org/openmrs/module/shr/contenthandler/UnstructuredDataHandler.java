@@ -32,7 +32,7 @@ public class UnstructuredDataHandler implements ContentHandler {
 	
 	protected final Log log = LogFactory.getLog(this.getClass());
 	
-	protected static final String UNSTRUCTURED_ATTACHMENT_CONCEPT = "Unstructured Attachment";
+	protected static final String UNSTRUCTURED_ATTACHMENT_CONCEPT_BASE_NAME = "Unstructured Attachment";
 	
 	protected static final String ENCOUNTERROLE_UUID_GLOBAL_PROP = "shr.contenthandler.encounterrole.uuid";
 	protected static final String UNSTRUCTURED_DATA_HANDLER_GLOBAL_PROP = "shr.contenthandler.unstructureddatahandler.key";
@@ -77,25 +77,30 @@ public class UnstructuredDataHandler implements ContentHandler {
 		Obs res = new Obs();
 		ComplexData cd = new ComplexData(contentType, content);
 		
-		res.setConcept(getUnstructuredAttachmentConcept());
+		res.setConcept(getUnstructuredAttachmentConcept(content.getFormatCode()));
 		res.setComplexData(cd);
 		res.setObsDatetime(new Date());
 		
 		return res;
 	}
 
-	private Concept getUnstructuredAttachmentConcept() {
-		Concept res = Context.getConceptService().getConceptByName(UNSTRUCTURED_ATTACHMENT_CONCEPT);
+	private Concept getUnstructuredAttachmentConcept(String formatCode) {
+		String conceptName = getUnstructuredAttachmentConceptName(formatCode);
+		Concept res = Context.getConceptService().getConceptByName(conceptName);
 		if (res==null) {
-			res = createUnstructuredAttachmentConcept();
+			res = createUnstructuredAttachmentConcept(conceptName);
 		}
 		return res;
 	}
 	
-	private Concept createUnstructuredAttachmentConcept() {
+	private static String getUnstructuredAttachmentConceptName(String formatCode) {
+		return String.format("%s (%s)", UNSTRUCTURED_ATTACHMENT_CONCEPT_BASE_NAME, formatCode);
+	}
+	
+	private Concept createUnstructuredAttachmentConcept(String name) {
 		ConceptService cs = Context.getConceptService();
 		ConceptComplex c = new ConceptComplex();
-		ConceptName cn = new ConceptName(UNSTRUCTURED_ATTACHMENT_CONCEPT, Locale.ENGLISH);
+		ConceptName cn = new ConceptName(name, Locale.ENGLISH);
 		ConceptDescription cd = new ConceptDescription("Represents a generic unstructured data attachment", Locale.ENGLISH);
 		
 		c.setFullySpecifiedName(cn);
@@ -143,11 +148,10 @@ public class UnstructuredDataHandler implements ContentHandler {
 			return Collections.emptyList();
 		
 		List<Content> res = new ArrayList<Content>(encs.size());
-		Concept unstructuredConcept = getUnstructuredAttachmentConcept();
 		
 		for (Encounter enc : encs) {
 			for (Obs obs : enc.getAllObs()) {
-				if (obs.isComplex() && obs.getConcept().getConceptId().equals(unstructuredConcept.getConceptId())) {
+				if (obs.isComplex() && isConceptAnUnstructuredDataType(obs.getConcept())) {
 					Object data = obs.getComplexData().getData();
 					
 					if (data==null || !(data instanceof Content)) {
@@ -155,12 +159,18 @@ public class UnstructuredDataHandler implements ContentHandler {
 						continue;
 					}
 					
-					res.add((Content)data);
+					if (((Content)data).getContentType().equals(contentType)) {
+						res.add((Content)data);
+					}
 				}
 			}
 		}
 		
 		return res;
+	}
+	
+	private boolean isConceptAnUnstructuredDataType(Concept c) {
+		return c.getName().getName().startsWith(UNSTRUCTURED_ATTACHMENT_CONCEPT_BASE_NAME);
 	}
 
 	@Override
