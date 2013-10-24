@@ -3,6 +3,7 @@ package org.openmrs.module.shr.contenthandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -121,9 +122,16 @@ public class UnstructuredDataHandler implements ContentHandler {
 	 * @see ContentHandler#fetchDocument(String)
 	 */
 	@Override
-	public Content fetchDocument(String documentUniqueId) {
-		//TODO
-		throw new NotImplementedException();
+	public Content fetchDocument(String encounterUuid) {
+		Encounter enc = Context.getEncounterService().getEncounterByUuid(encounterUuid);
+		if (enc==null)
+			return null;
+		
+		List<Content> res = new LinkedList<Content>();
+		getContentFromEncounter(res, enc);
+		if (res.isEmpty())
+			return null;
+		return res.get(0);
 	}
 
 	/**
@@ -131,8 +139,15 @@ public class UnstructuredDataHandler implements ContentHandler {
 	 */
 	@Override
 	public Content fetchDocument(int encounterId) {
-		// TODO Auto-generated method stub
-		return null;
+		Encounter enc = Context.getEncounterService().getEncounter(encounterId);
+		if (enc==null)
+			return null;
+		
+		List<Content> res = new LinkedList<Content>();
+		getContentFromEncounter(res, enc);
+		if (res.isEmpty())
+			return null;
+		return res.get(0);
 	}
 
 
@@ -158,23 +173,27 @@ public class UnstructuredDataHandler implements ContentHandler {
 		List<Content> res = new ArrayList<Content>(encs.size());
 		
 		for (Encounter enc : encs) {
-			for (Obs obs : enc.getAllObs()) {
-				if (obs.isComplex() && isConceptAnUnstructuredDataType(obs.getConcept())) {
-					Object data = obs.getComplexData().getData();
-					
-					if (data==null || !(data instanceof Content)) {
-						log.warn("Unprocessable content found in unstructured data obs");
-						continue;
-					}
-					
-					if (((Content)data).getContentType().equals(contentType)) {
-						res.add((Content)data);
-					}
-				}
-			}
+			getContentFromEncounter(res, enc);
 		}
 		
 		return res;
+	}
+	
+	private void getContentFromEncounter(List<Content> dst, Encounter enc) {
+		for (Obs obs : enc.getAllObs()) {
+			if (obs.isComplex() && isConceptAnUnstructuredDataType(obs.getConcept())) {
+				Object data = obs.getComplexData().getData();
+				
+				if (data==null || !(data instanceof Content)) {
+					log.warn("Unprocessable content found in unstructured data obs");
+					continue;
+				}
+				
+				if (((Content)data).getContentType().equals(contentType)) {
+					dst.add((Content)data);
+				}
+			}
+		}
 	}
 	
 	private boolean isConceptAnUnstructuredDataType(Concept c) {
