@@ -37,10 +37,13 @@ import org.openmrs.Provider;
 public interface ContentHandler {
 
 	/**
-	 * Parse and store clinical content for the specified patient. Binary data should be sent base64 encoded.
+	 * Parse and store clinical content for the specified patient.
 	 * 
 	 * @param patient The patient associated with the content
-	 * @param content The raw payload
+	 * @param provider The clinical provider associated with the content
+	 * @param role The encounter role associated with the content
+	 * @param encounterType The encounter type
+	 * @param content The encounter data
 	 * @return The created and saved encounter object
 	 */
 	Encounter saveContent(Patient patient, Provider provider, EncounterRole role, EncounterType encounterType, Content content);
@@ -51,15 +54,15 @@ public interface ContentHandler {
 	 * @param encounterUuid The encounter identifier
 	 * @return The content in the content handler's format
 	 */
-	Content fetchDocument(String encounterUuid);
+	Content fetchContent(String encounterUuid);
 
 	/**
-	 * Retrieve the content associated with the specified encounter uuid.
+	 * Retrieve the content associated with the specified encounter id.
 	 * 
-	 * @param encounterUuid The encounter identifier
+	 * @param encounterId The encounter identifier
 	 * @return The content in the content handler's format
 	 */
-	Content fetchDocument(int encounterId);
+	Content fetchContent(int encounterId);
 
 	/**
 	 * Retrieve a list of formatted encounters for a specified patient.
@@ -86,7 +89,7 @@ public interface ContentHandler {
 	 * Create a clone of this handler.
 	 * <p>
 	 * Note that this method allows a content handler to return itself as an instance (i.e. {@code return this;}).
-	 * This is likely to happen if the handler doesn't have any state.
+	 * This is likely to happen if the handler doesn't have any state or if it's thread safe.
 	 * 
 	 * @return A clone of this handler
 	 */

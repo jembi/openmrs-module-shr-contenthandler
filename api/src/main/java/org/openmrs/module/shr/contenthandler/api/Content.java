@@ -8,7 +8,7 @@ import org.apache.commons.lang.NotImplementedException;
 /**
  * A text based data payload.
  */
-public final class Content implements Serializable {
+public final class Content implements Comparable<Content>, Serializable {
 
 	/**
 	 * 
@@ -138,5 +138,21 @@ public final class Content implements Serializable {
 	
 	public boolean payloadIsUrl() {
 		return payloadIsUrl;
+	}
+
+	/**
+	 * Two Content objects are considered equal if their payloads are equal.
+	 */
+	@Override
+	public int compareTo(Content o) {
+		return payload.compareTo(o.payload);
+	}
+
+	/**
+	 * Two Content objects are considered equal if their payloads are equal.
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		return obj!=null && (obj instanceof Content) && compareTo((Content)obj)==0;
 	}
 }

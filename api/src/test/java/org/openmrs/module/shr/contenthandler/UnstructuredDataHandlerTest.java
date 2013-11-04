@@ -9,28 +9,41 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.openmrs.Encounter;
+import org.openmrs.EncounterRole;
+import org.openmrs.EncounterType;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
+import org.openmrs.Provider;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.shr.contenthandler.api.Content;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
 public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest {
 	
-	private static final String TEST_CONTENT = "this is a test string. it is awesome.";
+	private static final Content TEST_CONTENT = new Content("This is a test string. It is awesome.", "PlainString", "text/plain");
 
 
 	/**
-	 * @see UnstructuredDataHandler#createEncounter(Patient,String)
+	 * @see UnstructuredDataHandler#cloneHandler()
+	 * @verifies return an UnstructuredDataHandler instance with the same content type
+	 */
+	@Test
+	public void cloneHandler_shouldReturnAnUnstructuredDataHandlerInstanceWithTheSameContentType()
+			throws Exception {
+		UnstructuredDataHandler handler = new UnstructuredDataHandler(TEST_CONTENT.getContentType());
+		UnstructuredDataHandler clone = handler.cloneHandler();
+		assertNotNull(clone);
+		assertEquals(handler.contentType, clone.contentType);
+	}
+
+	/**
+	 * @see UnstructuredDataHandler#saveContent(Patient,Provider,EncounterRole,EncounterType,Content)
 	 * @verifies contain a complex obs containing the content
 	 */
 	@Test
-	public void createEncounter_shouldContainAComplexObsContainingTheContent()
+	public void saveContent_shouldContainAComplexObsContainingTheContent()
 			throws Exception {
-		fail("This fails! oh no!");
-		
-		UnstructuredDataHandler handler = new UnstructuredDataHandler("text/plain");
-		Patient p = mock(Patient.class);
-		//FIXME
-		Encounter res = handler.createEncounter(p, null, null, null, null);
+		Encounter res = saveTestEncounter();
 		Set<Obs> obs = res.getAllObs();
 		
 		assertNotNull(obs);
@@ -38,24 +51,19 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 		
 		Obs theObs = obs.iterator().next();
 		assertTrue(theObs.isComplex());
-		assertEquals(theObs.getComplexData().getTitle(), "text/plain");
+		assertEquals(theObs.getComplexData().getTitle(), TEST_CONTENT.getContentType());
 		assertEquals(theObs.getComplexData().getData(), TEST_CONTENT);
 	}
 
 	/**
-	 * @see UnstructuredDataHandler#createEncounter(Patient,String)
+	 * @see UnstructuredDataHandler#saveContent(Patient,Provider,EncounterRole,EncounterType,Content)
 	 * @verifies create a new encounter object using the current time
 	 */
 	@Test
-	public void createEncounter_shouldCreateANewEncounterObjectUsingTheCurrentTime()
+	public void saveContent_shouldCreateANewEncounterObjectUsingTheCurrentTime()
 			throws Exception {
-		fail("This fails! oh no!");
-		
-		UnstructuredDataHandler handler = new UnstructuredDataHandler("text/plain");
-		Patient p = mock(Patient.class);
 		Date beforeSaveTime = new Date();
-		//FIXME
-		Encounter res = handler.createEncounter(p, null, null, null, null);
+		Encounter res = saveTestEncounter();
 		
 		assertNotNull(res);
 		
@@ -64,5 +72,14 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 		//There shouldn't be more than a few milliseconds diff
 		long diff = Math.abs(encDateTime.getTime() - beforeSaveTime.getTime());
 		assertTrue(diff <= 1000);
+	}
+	
+	private Encounter saveTestEncounter() {
+		UnstructuredDataHandler handler = new UnstructuredDataHandler(TEST_CONTENT.getContentType());
+		Patient patient = Context.getPatientService().getPatient(2);
+		Provider provider = Context.getProviderService().getProvider(1);
+		EncounterRole role = Context.getEncounterService().getEncounterRole(1);
+		EncounterType type = Context.getEncounterService().getEncounterType(1);
+		return handler.saveContent(patient, provider, role, type, TEST_CONTENT);
 	}
 }

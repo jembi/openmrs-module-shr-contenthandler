@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
@@ -27,7 +26,7 @@ import org.openmrs.module.shr.contenthandler.api.ContentHandler;
 import org.openmrs.obs.ComplexData;
 
 /**
- * A content handler for storing data as unstructured "blobs".
+ * A content handler for storing data as unstructured <i>blobs</i>.
  */
 public class UnstructuredDataHandler implements ContentHandler {
 	
@@ -38,14 +37,16 @@ public class UnstructuredDataHandler implements ContentHandler {
 	protected static final String ENCOUNTERROLE_UUID_GLOBAL_PROP = "shr.contenthandler.encounterrole.uuid";
 	protected static final String UNSTRUCTURED_DATA_HANDLER_GLOBAL_PROP = "shr.contenthandler.unstructureddatahandler.key";
 	
-	private String contentType;
+	protected final String contentType;
 	
 	public UnstructuredDataHandler(String contentType) {
 		this.contentType = contentType;
 	}
 
 	/**
-	 * @see ContentHandler#saveContent(Patient, String)
+	 * @see ContentHandler#saveContent(Patient, Provider, EncounterRole, EncounterType, Content)
+	 * @should create a new encounter object using the current time
+	 * @should contain a complex obs containing the content
 	 */
 	@Override
 	public Encounter saveContent(Patient patient, Provider provider, EncounterRole role, EncounterType encounterType, Content content) {
@@ -56,10 +57,8 @@ public class UnstructuredDataHandler implements ContentHandler {
 	
 	/**
 	 * Create a new encounter object with a complex obs for storing the specified content. 
-	 * @should create a new encounter object using the current time
-	 * @should contain a complex obs containing the content
 	 */
-	protected Encounter createEncounter(Patient patient, Provider provider, EncounterRole role, EncounterType encounterType, Content content) {
+	private Encounter createEncounter(Patient patient, Provider provider, EncounterRole role, EncounterType encounterType, Content content) {
 		Encounter enc = new Encounter();
 		
 		enc.setEncounterType(encounterType);
@@ -86,10 +85,12 @@ public class UnstructuredDataHandler implements ContentHandler {
 	}
 
 	private Concept getUnstructuredAttachmentConcept(String formatCode) {
+		ConceptService cs = Context.getConceptService();
 		String conceptName = getUnstructuredAttachmentConceptName(formatCode);
-		Concept res = Context.getConceptService().getConceptByName(conceptName);
+		Concept res = cs.getConceptByName(conceptName);
 		if (res==null) {
-			res = createUnstructuredAttachmentConcept(conceptName);
+			res = buildUnstructuredAttachmentConcept(conceptName);
+			cs.saveConcept(res);
 		}
 		return res;
 	}
@@ -98,7 +99,7 @@ public class UnstructuredDataHandler implements ContentHandler {
 		return String.format("%s (%s)", UNSTRUCTURED_ATTACHMENT_CONCEPT_BASE_NAME, formatCode);
 	}
 	
-	private Concept createUnstructuredAttachmentConcept(String name) {
+	private Concept buildUnstructuredAttachmentConcept(String name) {
 		ConceptService cs = Context.getConceptService();
 		ConceptComplex c = new ConceptComplex();
 		ConceptName cn = new ConceptName(name, Locale.ENGLISH);
@@ -119,10 +120,10 @@ public class UnstructuredDataHandler implements ContentHandler {
 	
 
 	/**
-	 * @see ContentHandler#fetchDocument(String)
+	 * @see ContentHandler#fetchContent(String)
 	 */
 	@Override
-	public Content fetchDocument(String encounterUuid) {
+	public Content fetchContent(String encounterUuid) {
 		Encounter enc = Context.getEncounterService().getEncounterByUuid(encounterUuid);
 		if (enc==null)
 			return null;
@@ -135,10 +136,10 @@ public class UnstructuredDataHandler implements ContentHandler {
 	}
 
 	/**
-	 * @see ContentHandler#fetchDocument(int)
+	 * @see ContentHandler#fetchContent(int)
 	 */
 	@Override
-	public Content fetchDocument(int encounterId) {
+	public Content fetchContent(int encounterId) {
 		Encounter enc = Context.getEncounterService().getEncounter(encounterId);
 		if (enc==null)
 			return null;
@@ -200,8 +201,12 @@ public class UnstructuredDataHandler implements ContentHandler {
 		return c.getName().getName().startsWith(UNSTRUCTURED_ATTACHMENT_CONCEPT_BASE_NAME);
 	}
 
+	/**
+	 * @see ContentHandler#cloneHandler()
+	 * @should return an UnstructuredDataHandler instance with the same content type
+	 */
 	@Override
-	public ContentHandler cloneHandler() {
+	public UnstructuredDataHandler cloneHandler() {
 		return new UnstructuredDataHandler(contentType);
 	}
 }
