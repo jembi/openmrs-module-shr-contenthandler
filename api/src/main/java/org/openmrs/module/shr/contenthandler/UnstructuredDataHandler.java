@@ -121,6 +121,9 @@ public class UnstructuredDataHandler implements ContentHandler {
 
 	/**
 	 * @see ContentHandler#fetchContent(String)
+	 * @should return a Content object for the encounter if found
+	 * @should return null if the encounter doesn't contain an unstructured data obs
+	 * @should return null if the encounter isn't found
 	 */
 	@Override
 	public Content fetchContent(String encounterUuid) {
@@ -137,6 +140,9 @@ public class UnstructuredDataHandler implements ContentHandler {
 
 	/**
 	 * @see ContentHandler#fetchContent(int)
+	 * @should return a Content object for the encounter if found
+	 * @should return null if the encounter doesn't contain an unstructured data obs
+	 * @should return null if the encounter isn't found
 	 */
 	@Override
 	public Content fetchContent(int encounterId) {
@@ -154,6 +160,8 @@ public class UnstructuredDataHandler implements ContentHandler {
 
 	/**
 	 * @see ContentHandler#queryEncounters(Patient, Date, Date)
+	 * @should return a list of Content objects for all matching encounters
+	 * @should return an empty list if no encounters with unstructured data obs are found
 	 */
 	@Override
 	public List<Content> queryEncounters(Patient patient, Date from, Date to) {
@@ -162,12 +170,14 @@ public class UnstructuredDataHandler implements ContentHandler {
 
 	/**
 	 * @see ContentHandler#queryEncounters(Patient, EncounterType, Date, Date)
+	 * @should return a list of Content objects for all matching encounters
+	 * @should return an empty list if no encounters with unstructured data obs are found
 	 */
 	@Override
 	public List<Content> queryEncounters(Patient patient, List<EncounterType> encounterTypes, Date from, Date to) {
 		List<Encounter> encs = Context.getEncounterService().getEncounters(
 			patient, null, from, to, null, encounterTypes, null, null, null, false
-			);
+		);
 		if (encs==null || encs.isEmpty())
 			return Collections.emptyList();
 		
