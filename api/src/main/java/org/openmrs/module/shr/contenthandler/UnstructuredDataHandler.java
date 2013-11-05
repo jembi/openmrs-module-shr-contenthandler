@@ -33,8 +33,6 @@ public class UnstructuredDataHandler implements ContentHandler {
 	protected final Log log = LogFactory.getLog(this.getClass());
 	
 	protected static final String UNSTRUCTURED_ATTACHMENT_CONCEPT_BASE_NAME = "Unstructured Attachment";
-	
-	protected static final String ENCOUNTERROLE_UUID_GLOBAL_PROP = "shr.contenthandler.encounterrole.uuid";
 	protected static final String UNSTRUCTURED_DATA_HANDLER_GLOBAL_PROP = "shr.contenthandler.unstructureddatahandler.key";
 	
 	protected final String contentType;
@@ -161,6 +159,7 @@ public class UnstructuredDataHandler implements ContentHandler {
 	/**
 	 * @see ContentHandler#queryEncounters(Patient, Date, Date)
 	 * @should return a list of Content objects for all matching encounters
+	 * @should only return Content objects that match the handler's content type
 	 * @should return an empty list if no encounters with unstructured data obs are found
 	 */
 	@Override
@@ -171,6 +170,7 @@ public class UnstructuredDataHandler implements ContentHandler {
 	/**
 	 * @see ContentHandler#queryEncounters(Patient, EncounterType, Date, Date)
 	 * @should return a list of Content objects for all matching encounters
+	 * @should only return Content objects that match the handler's content type
 	 * @should return an empty list if no encounters with unstructured data obs are found
 	 */
 	@Override
