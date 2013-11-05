@@ -30,7 +30,14 @@ public final class Content implements Comparable<Content>, Serializable {
 		/**
 		 * Base64
 		 */
-		B64
+		B64,
+		/**
+		 * Binary.
+		 * <p>
+		 * Only applicable if the payload is a URL and
+		 * indicates that the data stored at the URL is binary.
+		 */
+		BINARY
 	}
 	
 	public static enum CompressionFormat {
@@ -102,6 +109,9 @@ public final class Content implements Comparable<Content>, Serializable {
 		
 		if (isCompressed() && !payloadIsUrl && !representation.equals(Representation.B64))
 			throw new InvalidRepresentationException("Compressed payload must be Base64 encoded");
+		
+		if (!payloadIsUrl && representation.equals(Representation.BINARY))
+			throw new InvalidRepresentationException("Binary payload must be Base64 encoded.");
 	}
 	
 	

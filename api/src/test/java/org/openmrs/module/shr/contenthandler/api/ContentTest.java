@@ -86,11 +86,20 @@ public class ContentTest {
 		testCompressedURL(compressDeflate(TEST_DATA), CompressionFormat.DF);
 		testCompressedURL(compressGZip(TEST_DATA), CompressionFormat.GZ);
 		testCompressedURL(compressZLib(TEST_DATA), CompressionFormat.ZL);
+		testCompressedURL_nonBase64(compressDeflate(TEST_DATA), CompressionFormat.DF);
+		testCompressedURL_nonBase64(compressGZip(TEST_DATA), CompressionFormat.GZ);
+		testCompressedURL_nonBase64(compressZLib(TEST_DATA), CompressionFormat.ZL);
 	}
 	
 	private void testCompressedURL(byte[] compressedPayload, CompressionFormat format) throws IOException {
 		setupContentMockService(Base64.encodeBase64(compressedPayload));
 		Content content = new Content("http://localhost:8001/resource", true, "xml", "text/xml", null, Representation.B64, format, null);
+		assertEquals(TEST_DATA, new String(content.getRawData()));
+	}
+	
+	private void testCompressedURL_nonBase64(byte[] compressedPayload, CompressionFormat format) throws IOException {
+		setupContentMockService(compressedPayload);
+		Content content = new Content("http://localhost:8001/resource", true, "xml", "text/xml", null, Representation.BINARY, format, null);
 		assertEquals(TEST_DATA, new String(content.getRawData()));
 	}
 
