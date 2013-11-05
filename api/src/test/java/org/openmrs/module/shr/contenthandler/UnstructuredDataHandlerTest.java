@@ -1,6 +1,5 @@
 package org.openmrs.module.shr.contenthandler;
 
-
 import static org.junit.Assert.*;
 
 import java.util.Calendar;
@@ -30,7 +29,9 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  */
 public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest {
 	
-	private static final Content TEST_CONTENT = new Content("This is a test string. It is awesome.", "PlainString", "text/plain");
+	private static final Content TEST_CONTENT_PLAIN = new Content("This is a test string. It is awesome.", "PlainString", "text/plain");
+	private static final Content TEST_CONTENT_PLAIN2 = new Content("This is a test string. It is awesome.", "PlainString2", "text/plain");
+	private static final Content TEST_CONTENT_XML = new Content("<test>This is a test string. It is awesome.</test>", "XMLString", "text/xml");
 
 
 	/**
@@ -40,7 +41,7 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	@Test
 	public void cloneHandler_shouldReturnAnUnstructuredDataHandlerInstanceWithTheSameContentType()
 			throws Exception {
-		UnstructuredDataHandler handler = new UnstructuredDataHandler(TEST_CONTENT.getContentType());
+		UnstructuredDataHandler handler = new UnstructuredDataHandler(TEST_CONTENT_PLAIN.getContentType());
 		UnstructuredDataHandler clone = handler.cloneHandler();
 		assertNotNull(clone);
 		assertEquals(handler.contentType, clone.contentType);
@@ -53,7 +54,7 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	@Test
 	public void saveContent_shouldContainAComplexObsContainingTheContent()
 			throws Exception {
-		Encounter res = saveTestEncounter();
+		Encounter res = saveTestEncounter(TEST_CONTENT_PLAIN);
 		Set<Obs> obs = res.getAllObs();
 		
 		assertNotNull(obs);
@@ -61,8 +62,8 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 		
 		Obs theObs = obs.iterator().next();
 		assertTrue(theObs.isComplex());
-		assertEquals(TEST_CONTENT.getContentType(), theObs.getComplexData().getTitle());
-		assertEquals(TEST_CONTENT, theObs.getComplexData().getData());
+		assertEquals(TEST_CONTENT_PLAIN.getContentType(), theObs.getComplexData().getTitle());
+		assertEquals(TEST_CONTENT_PLAIN, theObs.getComplexData().getData());
 	}
 
 	/**
@@ -73,7 +74,7 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	public void saveContent_shouldCreateANewEncounterObjectUsingTheCurrentTime()
 			throws Exception {
 		Date beforeSaveTime = new Date();
-		Encounter res = saveTestEncounter();
+		Encounter res = saveTestEncounter(TEST_CONTENT_PLAIN);
 		
 		assertNotNull(res);
 		
@@ -84,13 +85,19 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 		assertTrue(diff <= 1000);
 	}
 	
-	private Encounter saveTestEncounter() {
-		UnstructuredDataHandler handler = new UnstructuredDataHandler(TEST_CONTENT.getContentType());
+	private Encounter saveTestEncounter(Content content) {
+		return saveTestEncounter(content, 1);
+	}
+	
+	private Encounter saveTestEncounter(Content content, int typeId) {
+		UnstructuredDataHandler handler = new UnstructuredDataHandler(content.getContentType());
+		
 		Patient patient = Context.getPatientService().getPatient(2);
 		Provider provider = Context.getProviderService().getProvider(1);
 		EncounterRole role = Context.getEncounterService().getEncounterRole(1);
-		EncounterType type = Context.getEncounterService().getEncounterType(1);
-		return handler.saveContent(patient, provider, role, type, TEST_CONTENT);
+		EncounterType type = Context.getEncounterService().getEncounterType(typeId);
+		
+		return handler.saveContent(patient, provider, role, type, content);
 	}
 
 	/**
@@ -100,12 +107,12 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	@Test
 	public void fetchContent_int_shouldReturnAContentObjectForTheEncounterIfFound()
 			throws Exception {
-		UnstructuredDataHandler handler = new UnstructuredDataHandler(TEST_CONTENT.getContentType());
-		Encounter enc = saveTestEncounter();
+		UnstructuredDataHandler handler = new UnstructuredDataHandler(TEST_CONTENT_PLAIN.getContentType());
+		Encounter enc = saveTestEncounter(TEST_CONTENT_PLAIN);
 		
 		Content res = handler.fetchContent(enc.getId());
 		assertNotNull(res);
-		assertEquals(TEST_CONTENT, res);
+		assertEquals(TEST_CONTENT_PLAIN, res);
 	}
 
 	/**
@@ -145,12 +152,12 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	@Test
 	public void fetchContent_string_shouldReturnAContentObjectForTheEncounterIfFound()
 			throws Exception {
-		UnstructuredDataHandler handler = new UnstructuredDataHandler(TEST_CONTENT.getContentType());
-		Encounter enc = saveTestEncounter();
+		UnstructuredDataHandler handler = new UnstructuredDataHandler(TEST_CONTENT_PLAIN.getContentType());
+		Encounter enc = saveTestEncounter(TEST_CONTENT_PLAIN);
 		
 		Content res = handler.fetchContent(enc.getUuid());
 		assertNotNull(res);
-		assertEquals(TEST_CONTENT, res);
+		assertEquals(TEST_CONTENT_PLAIN, res);
 	}
 
 	/**
@@ -190,8 +197,52 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	@Test
 	public void queryEncounters_shouldReturnAListOfContentObjectsForAllMatchingEncounters()
 			throws Exception {
-		//TODO auto-generated
-		fail("Not yet implemented");
+		for (int i=0; i<3; i++)
+			saveTestEncounter(TEST_CONTENT_PLAIN);
+		Encounter oldEnc = saveTestEncounter(TEST_CONTENT_PLAIN2);
+		
+		Calendar oldDate = new GregorianCalendar();
+		oldDate.add(Calendar.DAY_OF_MONTH, -2);
+		
+		oldEnc.setEncounterDatetime(oldDate.getTime());
+		Context.getEncounterService().saveEncounter(oldEnc);
+		
+		//'oldEnc' should not be in the result set
+		getAndCheckContent(3, TEST_CONTENT_PLAIN.getContentType(), TEST_CONTENT_PLAIN.getFormatCode());
+	}
+
+	/**
+	 * @see UnstructuredDataHandler#queryEncounters(Patient,Date,Date)
+	 * @verifies only return Content objects that match the handler's content type
+	 */
+	@Test
+	public void queryEncounters_shouldOnlyReturnContentObjectsThatMatchTheHandlersContentType()
+			throws Exception {
+		for (int i=0; i<3; i++)
+			saveTestEncounter(TEST_CONTENT_PLAIN);
+		saveTestEncounter(TEST_CONTENT_XML);
+		
+		//XML content should not be in the result set
+		getAndCheckContent(3, TEST_CONTENT_PLAIN.getContentType(), TEST_CONTENT_PLAIN.getFormatCode());
+		//Plain text content should not be in the result set
+		getAndCheckContent(1, TEST_CONTENT_XML.getContentType(), TEST_CONTENT_XML.getFormatCode());
+	}
+	
+	private void getAndCheckContent(int expectedNumEncounters, String handlerContentType, String expectedFormatCode) {
+		Calendar from = new GregorianCalendar();
+		Calendar to = new GregorianCalendar();
+		from.add(Calendar.DAY_OF_MONTH, -1);
+		to.add(Calendar.DAY_OF_MONTH, 1);
+		
+		UnstructuredDataHandler handler = new UnstructuredDataHandler(handlerContentType);
+		Patient patient = Context.getPatientService().getPatient(2);
+		List<Content> res = handler.queryEncounters(patient, from.getTime(), to.getTime());
+		
+		assertEquals(expectedNumEncounters, res.size());
+		for (Content c : res) {
+			assertEquals(expectedFormatCode, c.getFormatCode());
+			assertEquals(handlerContentType, c.getContentType());
+		}
 	}
 
 	/**
@@ -224,8 +275,72 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	@Test
 	public void queryEncounters_list_shouldReturnAListOfContentObjectsForAllMatchingEncounters()
 			throws Exception {
-		//TODO auto-generated
-		fail("Not yet implemented");
+		int encType1 = 1;
+		int encType2 = 2;
+		
+		for (int i=0; i<3; i++)
+			saveTestEncounter(TEST_CONTENT_PLAIN, encType1);
+		Encounter oldEnc = saveTestEncounter(TEST_CONTENT_PLAIN2, encType1);
+		saveTestEncounter(TEST_CONTENT_PLAIN2, encType2);
+		
+		Calendar oldDate = new GregorianCalendar();
+		oldDate.add(Calendar.DAY_OF_MONTH, -2);
+		
+		oldEnc.setEncounterDatetime(oldDate.getTime());
+		Context.getEncounterService().saveEncounter(oldEnc);
+		
+		List<EncounterType> encTypes1 = Collections.singletonList(Context.getEncounterService().getEncounterType(encType1));
+		List<EncounterType> encTypes2 = Collections.singletonList(Context.getEncounterService().getEncounterType(encType2));
+		
+		//'oldEnc' and encType2 data should not be in the result set
+		getAndCheckContent(encTypes1, 3, TEST_CONTENT_PLAIN.getContentType(), TEST_CONTENT_PLAIN.getFormatCode());
+		//Only one encType2 data item should be in the result set
+		getAndCheckContent(encTypes2, 1, TEST_CONTENT_PLAIN2.getContentType(), TEST_CONTENT_PLAIN2.getFormatCode());
+	}
+
+	/**
+	 * @see UnstructuredDataHandler#queryEncounters(Patient,List,Date,Date)
+	 * @verifies only return Content objects that match the handler's content type
+	 */
+	@Test
+	public void queryEncounters_list_shouldOnlyReturnContentObjectsThatMatchTheHandlersContentType()
+			throws Exception {
+		int encType1 = 1;
+		int encType2 = 2;
+		
+		for (int i=0; i<3; i++)
+			saveTestEncounter(TEST_CONTENT_PLAIN, encType1);
+		saveTestEncounter(TEST_CONTENT_XML, encType1);
+		saveTestEncounter(TEST_CONTENT_PLAIN2, encType2);
+		
+		List<EncounterType> encTypes1 = Collections.singletonList(Context.getEncounterService().getEncounterType(encType1));
+		List<EncounterType> encTypes2 = Collections.singletonList(Context.getEncounterService().getEncounterType(encType2));
+		
+		//XML and encType2 data should not be in the result set
+		getAndCheckContent(encTypes1, 3, TEST_CONTENT_PLAIN.getContentType(), TEST_CONTENT_PLAIN.getFormatCode());
+		//only XML data should be in the result set
+		getAndCheckContent(encTypes1, 1, TEST_CONTENT_XML.getContentType(), TEST_CONTENT_XML.getFormatCode());
+		//only encType2 data should be in the result set
+		getAndCheckContent(encTypes2, 1, TEST_CONTENT_PLAIN2.getContentType(), TEST_CONTENT_PLAIN2.getFormatCode());
+	}
+	
+	private void getAndCheckContent(List<EncounterType> types, int expectedNumEncounters, String handlerContentType, String expectedFormatCode) {
+		Calendar from = new GregorianCalendar();
+		Calendar to = new GregorianCalendar();
+		
+		from.add(Calendar.DAY_OF_MONTH, -1);
+		to.add(Calendar.DAY_OF_MONTH, 1);
+		
+		UnstructuredDataHandler handler = new UnstructuredDataHandler(handlerContentType);
+		Patient patient = Context.getPatientService().getPatient(2);
+		List<Content> res = handler.queryEncounters(patient, types, from.getTime(), to.getTime());
+		
+		assertEquals(expectedNumEncounters, res.size());
+		for (Content c : res) {
+			assertEquals(expectedFormatCode, c.getFormatCode());
+			assertEquals(handlerContentType, c.getContentType());
+		}
+		
 	}
 
 	/**
