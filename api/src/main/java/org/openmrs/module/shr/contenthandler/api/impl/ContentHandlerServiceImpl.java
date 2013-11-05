@@ -37,7 +37,7 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 	@Override
 	public ContentHandler getContentHandler(String contentType) {
 		if (contentType==null || contentType.isEmpty() || !handlers.containsKey(contentType)) {
-			return new UnstructuredDataHandler();
+			return new UnstructuredDataHandler(contentType);
 		}
 		
 		return handlers.get(contentType).cloneHandler();

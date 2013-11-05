@@ -16,7 +16,11 @@ package org.openmrs.module.shr.contenthandler.api;
 import java.util.Date;
 import java.util.List;
 
+import org.openmrs.Encounter;
+import org.openmrs.EncounterRole;
+import org.openmrs.EncounterType;
 import org.openmrs.Patient;
+import org.openmrs.Provider;
 
 /**
  * A content handler provides an implementation for storing and retrieving patient encounter data in a particular format.
@@ -36,46 +40,56 @@ public interface ContentHandler {
 	 * Parse and store clinical content for the specified patient.
 	 * 
 	 * @param patient The patient associated with the content
-	 * @param content The raw payload
+	 * @param provider The clinical provider associated with the content
+	 * @param role The encounter role associated with the content
+	 * @param encounterType The encounter type
+	 * @param content The encounter data
+	 * @return The created and saved encounter object
 	 */
-	void saveContent(Patient patient, String content);
+	Encounter saveContent(Patient patient, Provider provider, EncounterRole role, EncounterType encounterType, Content content);
 
 	/**
-	 * Parse and store clinical content for the specified patient.
-	 * <p>
-	 * The stored content must be linked to the specified document identifier
-	 * such that the content can be retrieved using this identifier.
+	 * Retrieve the content associated with the specified encounter uuid.
 	 * 
-	 * @see #fetchDocument(String)
-	 * @param patient The patient associated with the content
-	 * @param documentUniqueId The unique document identifier
-	 * @param content The raw payload
-	 */
-	void saveContent(Patient patient, String documentUniqueId, String content);
-
-	/**
-	 * Retrieve the content associated with the specified document id.
-	 * 
-	 * @param documentUniqueId The unique document identifier
+	 * @param encounterUuid The encounter identifier
 	 * @return The content in the content handler's format
 	 */
-	String fetchDocument(String documentUniqueId);
+	Content fetchContent(String encounterUuid);
+
+	/**
+	 * Retrieve the content associated with the specified encounter id.
+	 * 
+	 * @param encounterId The encounter identifier
+	 * @return The content in the content handler's format
+	 */
+	Content fetchContent(int encounterId);
 
 	/**
 	 * Retrieve a list of formatted encounters for a specified patient.
 	 * 
 	 * @param patient The patient associated with the content
 	 * @param from The earliest encounter time to search for (inclusive)
-	 * @param to The latest encounter time to search for (inclusive)
+	 * @param to The latest encounter time to search for (exclusive)
 	 * @return A list of encounters in the content handler's format
 	 */
-	List<String> queryEncounters(Patient patient, Date from, Date to);
+	List<Content> queryEncounters(Patient patient, Date from, Date to);
+	
+	/**
+	 * Retrieve a list of formatted encounters for a specified patient.
+	 * 
+	 * @param patient The patient associated with the content
+	 * @param encounterTypes A list of encounter types to search for
+	 * @param from The earliest encounter time to search for (inclusive)
+	 * @param to The latest encounter time to search for (exclusive)
+	 * @return A list of encounters in the content handler's format
+	 */
+	List<Content> queryEncounters(Patient patient, List<EncounterType> encounterTypes, Date from, Date to);
 
 	/**
 	 * Create a clone of this handler.
 	 * <p>
 	 * Note that this method allows a content handler to return itself as an instance (i.e. {@code return this;}).
-	 * This is likely to happen if the handler doesn't have any state.
+	 * This is likely to happen if the handler doesn't have any state or if it's thread safe.
 	 * 
 	 * @return A clone of this handler
 	 */
