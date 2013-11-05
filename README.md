@@ -27,7 +27,7 @@ Creating a Content Handler
 To provide a content handler implementation, create a class that implements the ```org.openmrs.module.shr.contenthandler.api.ContentHandler``` interface.
 A handler can then be registered with the Content Handler Service by providing an instance of the handler:
 ```
-ContentHandlerService chs = Content.getService(ContentHandlerService.class);
+ContentHandlerService chs = Context.getService(ContentHandlerService.class);
 chs.registerContentHandler("application/xml+cda", new MyCDAHandler());
 ```
 A good time to perform this registration would be on module startup in the module activator.
@@ -42,6 +42,6 @@ Using Content Handlers
 ----------------------
 To find a content handler for a particular content type, simply use the Content Handler Service:
 ```
-ContentHandlerService chs = Content.getService(ContentHandlerService.class);
+ContentHandlerService chs = Context.getService(ContentHandlerService.class);
 ContentHandler handler = chs.getContentHandler("application/xml+cda");
 ```
