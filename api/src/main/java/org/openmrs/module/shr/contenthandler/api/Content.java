@@ -46,7 +46,7 @@ public final class Content implements Comparable<Content>, Serializable {
 		 * ZLib (RFC 1950)
 		 */
 		ZL,
-		//Since Compress (Z) is deprecated by the standard, we won't implement support for it
+		//Since Compress (Z) is deprecated by HL7, we won't implement support for it
 		//(Note that only the Deflate algorithm is actually required to be implemented)
 		/**
 		 * Compress
@@ -175,8 +175,8 @@ public final class Content implements Comparable<Content>, Serializable {
 	 * 
 	 * @should return the payload string as a byte array if it's not encoded or compressed
 	 * @should retrieve the data from a url if the payload is a url
-	 * @should decode the payload if it is base64 encoded
-	 * @should decompress the payload if it is compressed
+	 * @should decode the data if it is base64 encoded
+	 * @should decompress the data if it is compressed
 	 */
 	public byte[] getRawData() throws IOException {
 		byte[] data = null;
