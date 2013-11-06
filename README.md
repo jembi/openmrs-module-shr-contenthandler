@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jembi/openmrs-module-shr-contenthandler.png?branch=master)](https://travis-ci.org/jembi/openmrs-module-shr-contenthandler)
+
 OpenHIE Shared Health Record: Content Handler Module
 ====================================================
 
