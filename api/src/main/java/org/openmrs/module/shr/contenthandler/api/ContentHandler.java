@@ -68,8 +68,8 @@ public interface ContentHandler {
 	 * Retrieve a list of formatted encounters for a specified patient.
 	 * 
 	 * @param patient The patient associated with the content
-	 * @param from The earliest encounter time to search for (inclusive)
-	 * @param to The latest encounter time to search for (exclusive)
+	 * @param from (nullable) The earliest encounter time to search for (inclusive)
+	 * @param to (nullable) The latest encounter time to search for (exclusive)
 	 * @return A list of encounters in the content handler's format
 	 */
 	List<Content> queryEncounters(Patient patient, Date from, Date to);
@@ -79,8 +79,8 @@ public interface ContentHandler {
 	 * 
 	 * @param patient The patient associated with the content
 	 * @param encounterTypes A list of encounter types to search for
-	 * @param from The earliest encounter time to search for (inclusive)
-	 * @param to The latest encounter time to search for (exclusive)
+	 * @param from (nullable) The earliest encounter time to search for (inclusive)
+	 * @param to (nullable) The latest encounter time to search for (exclusive)
 	 * @return A list of encounters in the content handler's format
 	 */
 	List<Content> queryEncounters(Patient patient, List<EncounterType> encounterTypes, Date from, Date to);

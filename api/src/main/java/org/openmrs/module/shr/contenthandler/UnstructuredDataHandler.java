@@ -174,6 +174,7 @@ public class UnstructuredDataHandler implements ContentHandler {
 	 * @should return a list of Content objects for all matching encounters
 	 * @should only return Content objects that match the handler's content type
 	 * @should return an empty list if no encounters with unstructured data obs are found
+	 * @should handle null values for date from and to
 	 */
 	@Override
 	public List<Content> queryEncounters(Patient patient, Date from, Date to) {
@@ -185,6 +186,7 @@ public class UnstructuredDataHandler implements ContentHandler {
 	 * @should return a list of Content objects for all matching encounters
 	 * @should only return Content objects that match the handler's content type
 	 * @should return an empty list if no encounters with unstructured data obs are found
+	 * @should handle null values for date from and to
 	 */
 	@Override
 	public List<Content> queryEncounters(Patient patient, List<EncounterType> encounterTypes, Date from, Date to) {
