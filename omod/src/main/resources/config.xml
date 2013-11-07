@@ -28,12 +28,6 @@
 		</description>
 	</globalProperty>
 	<!-- / Global props -->
-	
-	<!-- Adds link to admin page -->
-	<extension>
-		<point>org.openmrs.admin.list</point>
-		<class>${project.parent.groupId}.shr.contenthandler.extension.html.AdminList</class>
-	</extension>
 
 	<!-- Internationalization -->
 	<!-- All message codes should start with ${project.parent.artifactId}. -->
