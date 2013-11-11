@@ -22,7 +22,7 @@
 	<!-- Global props -->
 	<globalProperty>
 		<property>shr.contenthandler.unstructureddatahandler.key</property>
-		<defaultValue>UnstructuredDataHandler</defaultValue>
+		<defaultValue>ContentObsHandler</defaultValue>
 		<description>
 			The complex obs handler to use for unstructured data.
 		</description>

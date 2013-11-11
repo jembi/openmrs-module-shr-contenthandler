@@ -44,5 +44,16 @@
 			</list>
 		</property>
 	</bean>
+
+	<bean parent="obsServiceTarget" >
+		<property name="handlers">
+			<map>
+				<entry>
+					<key><value>ContentObsHandler</value></key>
+					<bean class="org.openmrs.module.shr.contenthandler.obs.handler.ContentObsHandler"/>
+				</entry>
+			</map>
+		</property>
+	</bean>
 	
 </beans>
