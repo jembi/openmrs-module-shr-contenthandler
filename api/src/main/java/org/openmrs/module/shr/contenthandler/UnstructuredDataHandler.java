@@ -208,10 +208,10 @@ public class UnstructuredDataHandler implements ContentHandler {
 	private void getContentFromEncounter(List<Content> dst, Encounter enc) {
 		for (Obs obs : enc.getAllObs()) {
 			if (obs.isComplex() && isConceptAnUnstructuredDataType(obs.getConcept())) {
-				Object data = obs.getComplexData().getData();
+				Object data = obs.getComplexData()!=null ? obs.getComplexData().getData() : null;
 				
 				if (data==null || !(data instanceof Content)) {
-					log.warn("Unprocessable content found in unstructured data obs");
+					log.warn("Unprocessable content found in unstructured data obs (obsId = " + obs.getId() + ")");
 					continue;
 				}
 				
