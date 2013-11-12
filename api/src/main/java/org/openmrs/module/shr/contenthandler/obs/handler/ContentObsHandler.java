@@ -42,8 +42,7 @@ public class ContentObsHandler extends TextHandler {
 		
 		ComplexData data = obs.getComplexData();
 		if (data==null || !(data.getData() instanceof char[])) {
-			log.error("Unprocessable ComplexData found (obsId=" + obs.getObsId() + ")");
-			return obs;
+			throw new APIException("Unprocessable ComplexData found (obsId=" + obs.getObsId() + ")");
 		}
 		
 		String json = new String((char[])data.getData());
@@ -58,12 +57,10 @@ public class ContentObsHandler extends TextHandler {
 		ComplexData data = obs.getComplexData();
 		
 		if (data==null) {
-			log.warn("ComplexData is null (obsId=" + obs.getObsId() + ")");
-			return obs;
+			throw new APIException("ComplexData is null (obsId=" + obs.getObsId() + ")");
 		}
 		if (!(data.getData() instanceof Content)) {
-			log.warn("ContentObsHandler can only be used with Content objects (obsId=" + obs.getObsId() + ")");
-			return obs;
+			throw new APIException("ContentObsHandler can only be used with Content objects (obsId=" + obs.getObsId() + ")");
 		}
 		
 		Content content = (Content)data.getData();
