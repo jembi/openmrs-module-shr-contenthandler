@@ -33,10 +33,12 @@ import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.ConceptService;
+import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.shr.contenthandler.api.Content;
 import org.openmrs.module.shr.contenthandler.api.ContentHandler;
 import org.openmrs.obs.ComplexData;
+import org.openmrs.util.OpenmrsConstants;
 
 /**
  * A content handler for storing data as unstructured <i>blobs</i>.
@@ -206,9 +208,12 @@ public class UnstructuredDataHandler implements ContentHandler {
 	}
 	
 	private void getContentFromEncounter(List<Content> dst, Encounter enc) {
+		ObsService os = Context.getObsService();
+		
 		for (Obs obs : enc.getAllObs()) {
 			if (obs.isComplex() && isConceptAnUnstructuredDataType(obs.getConcept())) {
-				Object data = obs.getComplexData()!=null ? obs.getComplexData().getData() : null;
+				Obs complexObs = os.getComplexObs(obs.getObsId(), OpenmrsConstants.RAW_VIEW);
+				Object data = complexObs.getComplexData()!=null ? complexObs.getComplexData().getData() : null;
 				
 				if (data==null || !(data instanceof Content)) {
 					log.warn("Unprocessable content found in unstructured data obs (obsId = " + obs.getId() + ")");
