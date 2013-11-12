@@ -78,7 +78,6 @@ public final class Content implements Comparable<Content>, Serializable {
 		Z
 	}
 	
-	private final String payload;
 	private final String formatCode;
 	private final String contentType;
 	private final String encoding;
@@ -86,6 +85,7 @@ public final class Content implements Comparable<Content>, Serializable {
 	private final CompressionFormat compressionFormat;
 	private final Locale language;
 	private final boolean payloadIsUrl;
+	private final String payload;
 	
 	
 	/**
@@ -128,10 +128,6 @@ public final class Content implements Comparable<Content>, Serializable {
 	}
 	
 	
-	public String getPayload() {
-		return payload;
-	}
-	
 	public String getFormatCode() {
 		return formatCode;
 	}
@@ -172,23 +168,11 @@ public final class Content implements Comparable<Content>, Serializable {
 	public boolean payloadIsUrl() {
 		return payloadIsUrl;
 	}
-
-	/**
-	 * Two Content objects are considered equal if their payloads are equal.
-	 */
-	@Override
-	public int compareTo(Content o) {
-		return payload.compareTo(o.payload);
-	}
-
-	/**
-	 * Two Content objects are considered equal if their payloads are equal.
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		return obj!=null && (obj instanceof Content) && compareTo((Content)obj)==0;
-	}
 	
+	
+	public String getPayload() {
+		return payload;
+	}
 	
 	/**
 	 * Returns the raw data represented by this Content object.
@@ -222,5 +206,22 @@ public final class Content implements Comparable<Content>, Serializable {
 		}
 		
 		return data;
+	}
+
+	
+	/**
+	 * Two Content objects are considered equal if their payloads are equal.
+	 */
+	@Override
+	public int compareTo(Content o) {
+		return payload.compareTo(o.payload);
+	}
+
+	/**
+	 * Two Content objects are considered equal if their payloads are equal.
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		return obj!=null && (obj instanceof Content) && compareTo((Content)obj)==0;
 	}
 }
