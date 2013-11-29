@@ -147,6 +147,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 		chs.registerContentHandler("text/plain", mockHandler);
 		try {
 			chs.registerContentHandler("text/plain", mockHandler2);
+			fail();
 		} catch (AlreadyRegisteredException ex) {
 			//expected
 		}
@@ -178,16 +179,19 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 		ContentHandler mockHandler = mock(ContentHandler.class);
 		try {
 			chs.registerContentHandler(null, mockHandler);
+			fail();
 		} catch (InvalidContentTypeException ex) {
 			//expected
 		}
 		try {
 			chs.registerContentHandler("", mockHandler);
+			fail();
 		} catch (InvalidContentTypeException ex) {
 			//expected
 		}
 		try {
 			chs.registerContentHandler("This isn't valid", mockHandler);
+			fail();
 		} catch (InvalidContentTypeException ex) {
 			//expected
 		}
@@ -221,6 +225,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 		
 		try {
 			chs.registerContentHandler("text/plain", null);
+			fail();
 		} catch (NullPointerException ex) {
 			//expected
 		}

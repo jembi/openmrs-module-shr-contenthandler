@@ -47,6 +47,10 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 	public void registerContentHandler(String contentType,
 			ContentHandler prototype) throws AlreadyRegisteredException, InvalidContentTypeException {
 		
+		if (prototype==null) {
+			throw new NullPointerException();
+		}
+		
 		if (!isValidContentType(contentType)) {
 			throw new InvalidContentTypeException();
 		}
