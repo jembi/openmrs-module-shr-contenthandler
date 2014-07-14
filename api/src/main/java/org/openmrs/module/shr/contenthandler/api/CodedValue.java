@@ -24,20 +24,20 @@ public final class CodedValue implements Comparable<CodedValue>, Serializable {
 	
 	private final String code;
 	private final String codingScheme;
-	private final String codingSchemeName;
+	private final String codeName;
 	
 	public CodedValue(String code, String codingScheme) {
 		this(code, codingScheme, null);
 	}
 	
-	public CodedValue(String code, String codingScheme, String codingSchemeName) {
+	public CodedValue(String code, String codingScheme, String codeName) {
 		if (code==null || codingScheme==null) {
 			throw new NullPointerException();
 		}
 		
 		this.code = code;
 		this.codingScheme = codingScheme;
-		this.codingSchemeName = codingSchemeName;
+		this.codeName = codeName;
 	}
 
 	public String getCode() {
@@ -48,8 +48,8 @@ public final class CodedValue implements Comparable<CodedValue>, Serializable {
 		return codingScheme;
 	}
 
-	public String getCodingSchemeName() {
-		return codingSchemeName;
+	public String getCodeName() {
+		return codeName;
 	}
 
 	@Override
@@ -95,7 +95,6 @@ public final class CodedValue implements Comparable<CodedValue>, Serializable {
 
 	@Override
 	public String toString() {
-		return "CodedValue [code=" + code + ", codingScheme=" + codingScheme
-				+ ", codingSchemeName=" + codingSchemeName + "]";
+		return "CodedValue [code=" + code + ", codingScheme=" + codingScheme + ", codeName=" + codeName + "]";
 	}
 }
