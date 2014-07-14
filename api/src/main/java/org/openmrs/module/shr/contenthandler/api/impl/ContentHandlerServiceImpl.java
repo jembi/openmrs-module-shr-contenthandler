@@ -21,8 +21,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.shr.contenthandler.UnstructuredDataHandler;
 import org.openmrs.module.shr.contenthandler.api.AlreadyRegisteredException;
+import org.openmrs.module.shr.contenthandler.api.CodedValue;
 import org.openmrs.module.shr.contenthandler.api.ContentHandler;
 import org.openmrs.module.shr.contenthandler.api.ContentHandlerService;
+import org.openmrs.module.shr.contenthandler.api.InvalidCodedValueException;
 import org.openmrs.module.shr.contenthandler.api.InvalidContentTypeException;
 
 /**
@@ -76,9 +78,9 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 	}
 
 	@Override
-	public ContentHandler getContentHandler(String typeCode, String formatCode) {
-		if (typeCode==null || typeCode.isEmpty() ||
-			formatCode==null || formatCode.isEmpty() ||
+	public ContentHandler getContentHandler(CodedValue typeCode, CodedValue formatCode) {
+		if (typeCode==null || typeCode.getCode().isEmpty() || typeCode.getCodingScheme().isEmpty() ||
+			formatCode==null || formatCode.getCode().isEmpty() || formatCode.getCodingScheme().isEmpty() ||
 			!typeFormatCodeHandlers.containsKey(new TypeFormatCode(typeCode, formatCode))) {
 			return new UnstructuredDataHandler(typeCode, formatCode);
 		}
@@ -87,15 +89,15 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 	}
 
 	@Override
-	public void registerContentHandler(String typeCode, String formatCode,
-			ContentHandler prototype) throws AlreadyRegisteredException,
-			InvalidContentTypeException {
+	public void registerContentHandler(CodedValue typeCode, CodedValue formatCode,
+			ContentHandler prototype) throws AlreadyRegisteredException, InvalidCodedValueException {
 		if (prototype==null) {
 			throw new NullPointerException();
 		}
 		
-		if (typeCode==null || typeCode.isEmpty() || formatCode==null || formatCode.isEmpty()) {
-			throw new InvalidContentTypeException();
+		if (typeCode==null || typeCode.getCode().isEmpty() || typeCode.getCodingScheme().isEmpty() ||
+			formatCode==null || formatCode.getCode().isEmpty() || formatCode.getCodingScheme().isEmpty()) {
+			throw new InvalidCodedValueException();
 		}
 		
 		TypeFormatCode codes = new TypeFormatCode(typeCode, formatCode);
@@ -109,16 +111,16 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 	}
 
 	@Override
-	public void deregisterContentHandler(String typeCode, String formatCode) {
+	public void deregisterContentHandler(CodedValue typeCode, CodedValue formatCode) {
 		typeFormatCodeHandlers.remove(new TypeFormatCode(typeCode, formatCode));
 		
 	}
 	
 	private static class TypeFormatCode {
-		String typeCode;
-		String formatCode;
+		CodedValue typeCode;
+		CodedValue formatCode;
 		
-		TypeFormatCode(String typeCode, String formatCode) {
+		TypeFormatCode(CodedValue typeCode, CodedValue formatCode) {
 			this.typeCode = typeCode;
 			this.formatCode = formatCode;
 		}

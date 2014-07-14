@@ -35,6 +35,7 @@ import org.openmrs.Provider;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.shr.contenthandler.api.CodedValue;
 import org.openmrs.module.shr.contenthandler.api.Content;
 import org.openmrs.module.shr.contenthandler.api.ContentHandler;
 import org.openmrs.obs.ComplexData;
@@ -51,8 +52,8 @@ public class UnstructuredDataHandler implements ContentHandler {
 	protected static final String UNSTRUCTURED_DATA_HANDLER_GLOBAL_PROP = "shr.contenthandler.unstructureddatahandler.key";
 	
 	protected final String contentType;
-	protected final String typeCode;
-	protected final String formatCode;
+	protected final CodedValue typeCode;
+	protected final CodedValue formatCode;
 	
 	
 	/**
@@ -66,7 +67,7 @@ public class UnstructuredDataHandler implements ContentHandler {
 	/**
 	 * Construct a new unstructured data handler that references content via type and format code
 	 */
-	public UnstructuredDataHandler(String typeCode, String formatCode) {
+	public UnstructuredDataHandler(CodedValue typeCode, CodedValue formatCode) {
 		this.typeCode = typeCode;
 		this.formatCode = formatCode;
 		this.contentType = null;
@@ -114,7 +115,7 @@ public class UnstructuredDataHandler implements ContentHandler {
 		return res;
 	}
 
-	private Concept getUnstructuredAttachmentConcept(String formatCode) {
+	private Concept getUnstructuredAttachmentConcept(CodedValue formatCode) {
 		ConceptService cs = Context.getConceptService();
 		String conceptName = getUnstructuredAttachmentConceptName(formatCode);
 		Concept res = cs.getConceptByName(conceptName);
@@ -125,8 +126,8 @@ public class UnstructuredDataHandler implements ContentHandler {
 		return res;
 	}
 	
-	private static String getUnstructuredAttachmentConceptName(String formatCode) {
-		return String.format("%s (%s)", UNSTRUCTURED_ATTACHMENT_CONCEPT_BASE_NAME, formatCode);
+	private static String getUnstructuredAttachmentConceptName(CodedValue formatCode) {
+		return String.format("%s (%s-%s)", UNSTRUCTURED_ATTACHMENT_CONCEPT_BASE_NAME, formatCode.getCodingScheme(), formatCode.getCode());
 	}
 	
 	private Concept buildUnstructuredAttachmentConcept(String name) {
@@ -238,7 +239,7 @@ public class UnstructuredDataHandler implements ContentHandler {
 				}
 				
 				String contentTitle = contentType!=null ? (((Content)data).getContentType()) :
-					((Content)data).getTypeCode() + ":" + ((Content)data).getFormatCode();
+					buildTypeFormatCodeTitle(((Content)data).getTypeCode(), ((Content)data).getFormatCode());
 					
 				if (contentTitle.equals(buildTitle())) {
 					dst.add((Content)data);
@@ -255,7 +256,12 @@ public class UnstructuredDataHandler implements ContentHandler {
 	 * Build a title that's suitable for referencing the complex obs
 	 */
 	private String buildTitle() {
-		return contentType!=null ? contentType : typeCode + ":" + formatCode;
+		return contentType!=null ? contentType : buildTypeFormatCodeTitle(typeCode, formatCode);
+	}
+	
+	protected static String buildTypeFormatCodeTitle(CodedValue typeCode, CodedValue formatCode) {
+		//Use the formatCode code as the title
+		return formatCode.getCode();
 	}
 
 	/**

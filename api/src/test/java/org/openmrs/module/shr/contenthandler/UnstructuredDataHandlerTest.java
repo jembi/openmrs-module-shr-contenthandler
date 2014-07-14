@@ -34,6 +34,7 @@ import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.shr.contenthandler.api.CodedValue;
 import org.openmrs.module.shr.contenthandler.api.Content;
 import org.openmrs.obs.ComplexData;
 import org.openmrs.obs.ComplexObsHandler;
@@ -49,9 +50,13 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  */
 public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest {
 	
-	private static final Content TEST_CONTENT_PLAIN = new Content("This is a test string. It is awesome.", "PlainString", "PlainString", "text/plain");
-	private static final Content TEST_CONTENT_PLAIN2 = new Content("This is a test string. It is awesome.", "PlainString2", "PlainString2", "text/plain");
-	private static final Content TEST_CONTENT_XML = new Content("<test>This is a test string. It is awesome.</test>", "XMLString", "XMLString", "text/xml");
+	private static final CodedValue TEST_CODE_PLAIN = new CodedValue("plain", "test", "test");
+	private static final CodedValue TEST_CODE_PLAIN2 = new CodedValue("plain2", "test", "test");
+	private static final CodedValue TEST_CODE_XML = new CodedValue("xml", "test", "test");
+	
+	private static final Content TEST_CONTENT_PLAIN = new Content("This is a test string. It is awesome.", TEST_CODE_PLAIN, TEST_CODE_PLAIN, "text/plain");
+	private static final Content TEST_CONTENT_PLAIN2 = new Content("This is a test string. It is awesome.", TEST_CODE_PLAIN2, TEST_CODE_PLAIN2, "text/plain");
+	private static final Content TEST_CONTENT_XML = new Content("<test>This is a test string. It is awesome.</test>", TEST_CODE_XML, TEST_CODE_XML, "text/xml");
 
 
 	@SuppressWarnings("deprecation")
@@ -122,7 +127,8 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 		
 		Obs theObs = obs.iterator().next();
 		assertTrue(theObs.isComplex());
-		assertEquals(TEST_CONTENT_PLAIN.getTypeCode() + ":" + TEST_CONTENT_PLAIN.getFormatCode(), theObs.getComplexData().getTitle());
+		String expectedTitle = UnstructuredDataHandler.buildTypeFormatCodeTitle(TEST_CONTENT_PLAIN.getTypeCode(), TEST_CONTENT_PLAIN.getFormatCode()); 
+		assertEquals(expectedTitle, theObs.getComplexData().getTitle());
 		assertEquals(TEST_CONTENT_PLAIN, theObs.getComplexData().getData());
 	}
 
@@ -469,11 +475,11 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	}
 	
 	
-	private void getAndCheckContent(List<EncounterType> types, int expectedNumEncounters, String handlerContentType, String expectedFormatCode) {
+	private void getAndCheckContent(List<EncounterType> types, int expectedNumEncounters, String handlerContentType, CodedValue expectedFormatCode) {
 		getAndCheckContent(-1, 1, types, expectedNumEncounters, handlerContentType, expectedFormatCode);
 	}
 		
-	private void getAndCheckContent(Integer fromDays, Integer toDays, List<EncounterType> types, int expectedNumEncounters, String handlerContentType, String expectedFormatCode) {
+	private void getAndCheckContent(Integer fromDays, Integer toDays, List<EncounterType> types, int expectedNumEncounters, String handlerContentType, CodedValue expectedFormatCode) {
 		Date from = shiftCurrentDate(fromDays);
 		Date to = shiftCurrentDate(toDays);
 		
@@ -488,11 +494,11 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 		}
 	}
 	
-	private void getAndCheckContent(int expectedNumEncounters, String handlerContentType, String expectedFormatCode) {
+	private void getAndCheckContent(int expectedNumEncounters, String handlerContentType, CodedValue expectedFormatCode) {
 		getAndCheckContent(-1, 1, expectedNumEncounters, handlerContentType, expectedFormatCode);
 	}
 	
-	private void getAndCheckContent(Integer fromDays, Integer toDays, int expectedNumEncounters, String handlerContentType, String expectedFormatCode) {
+	private void getAndCheckContent(Integer fromDays, Integer toDays, int expectedNumEncounters, String handlerContentType, CodedValue expectedFormatCode) {
 		Date from = shiftCurrentDate(fromDays);
 		Date to = shiftCurrentDate(toDays);
 		

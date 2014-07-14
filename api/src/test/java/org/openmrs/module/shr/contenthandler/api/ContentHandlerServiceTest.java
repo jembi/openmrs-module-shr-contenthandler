@@ -25,6 +25,9 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  */
 public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	
+	private static final CodedValue TEST_TYPE_CODE = new CodedValue("testType", "test", "test");
+	private static final CodedValue TEST_FORMAT_CODE = new CodedValue("testFormat", "test", "test");
+	
 	@Test
 	public void shouldSetupContext() {
 		assertNotNull(Context.getService(ContentHandlerService.class));
@@ -33,7 +36,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	private ContentHandlerService getService() {
 		ContentHandlerService chs = Context.getService(ContentHandlerService.class);
 		chs.deregisterContentHandler("text/plain");
-		chs.deregisterContentHandler("testType", "testFormat");
+		chs.deregisterContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE);
 		return chs;
 	}
 	
@@ -250,11 +253,11 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 		ContentHandler mockHandler = mock(ContentHandler.class);
 		when(mockHandler.cloneHandler()).thenReturn(mockHandler);
 		
-		chs.registerContentHandler("testType", "testFormat", mockHandler);
-		assertTrue(chs.getContentHandler("testType", "testFormat") == mockHandler);
+		chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler);
+		assertTrue(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) == mockHandler);
 		
-		chs.deregisterContentHandler("testType", "testFormat");
-		assertTrue(chs.getContentHandler("testType", "testFormat") != mockHandler);
+		chs.deregisterContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE);
+		assertTrue(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) != mockHandler);
 	}
 
 	/**
@@ -266,7 +269,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 			throws Exception {
 		ContentHandlerService chs = getService();
 		
-		chs.deregisterContentHandler("testType", "testFormat");
+		chs.deregisterContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE);
 	}
 
 	/**
@@ -281,8 +284,8 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 		ContentHandler mockHandler = mock(ContentHandler.class);
 		when(mockHandler.cloneHandler()).thenReturn(mockHandler);
 		
-		chs.registerContentHandler("testType", "testFormat", mockHandler);
-		assertTrue(chs.getContentHandler("testType", "testFormat") == mockHandler);
+		chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler);
+		assertTrue(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) == mockHandler);
 	}
 
 	/**
@@ -294,7 +297,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 			throws Exception {
 		ContentHandlerService chs = getService();
 		
-		assertTrue(chs.getContentHandler("testType", "testFormat") instanceof UnstructuredDataHandler);
+		assertTrue(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) instanceof UnstructuredDataHandler);
 	}
 
 	/**
@@ -305,12 +308,12 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	public void getContentHandler_tfCode_shouldNeverReturnNull() throws Exception {
 		ContentHandlerService chs = getService();
 		
-		assertNotNull(chs.getContentHandler("testType", "testFormat"));
+		assertNotNull(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE));
 		
 		ContentHandler mockHandler = mock(ContentHandler.class);
-		chs.registerContentHandler("testType", "testFormat", mockHandler);
+		chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler);
 		when(mockHandler.cloneHandler()).thenReturn(mockHandler);
-		assertNotNull(chs.getContentHandler("testType", "testFormat"));
+		assertNotNull(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE));
 	}
 
 	/**
@@ -325,9 +328,9 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 		ContentHandler mockHandler = mock(ContentHandler.class);
 		when(mockHandler.cloneHandler()).thenReturn(mockHandler);
 		
-		assertTrue(chs.getContentHandler("testType", "testFormat") != mockHandler);
-		chs.registerContentHandler("testType", "testFormat", mockHandler);
-		assertTrue(chs.getContentHandler("testType", "testFormat") == mockHandler);
+		assertTrue(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) != mockHandler);
+		chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler);
+		assertTrue(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) == mockHandler);
 	}
 
 	/**
@@ -343,9 +346,9 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 		when(mockHandler.cloneHandler()).thenReturn(mockHandler);
 		ContentHandler mockHandler2 = mock(ContentHandler.class);
 		
-		chs.registerContentHandler("testType", "testFormat", mockHandler);
+		chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler);
 		try {
-			chs.registerContentHandler("testType", "testFormat", mockHandler2);
+			chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler2);
 			fail();
 		} catch (AlreadyRegisteredException ex) {
 			//expected
@@ -368,36 +371,37 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 
 	/**
 	 * @see ContentHandlerService#registerContentHandler(String,String,ContentHandler)
-	 * @verifies Throw an InvalidContentTypeException if an invalid type and format code is specified
+	 * @verifies Throw an InvalidCodedTypeException if an invalid type and format code is specified
 	 */
 	@Test
 	public void registerContentHandler_tfCode_shouldThrowAnInvalidContentTypeExceptionIfAnInvalidContentTypeIsSpecified()
 			throws Exception {
 		ContentHandlerService chs = getService();
+		CodedValue blank = new CodedValue("", "");
 		
 		ContentHandler mockHandler = mock(ContentHandler.class);
 		try {
 			chs.registerContentHandler(null, null, mockHandler);
 			fail();
-		} catch (InvalidContentTypeException ex) {
+		} catch (InvalidCodedValueException ex) {
 			//expected
 		}
 		try {
-			chs.registerContentHandler("", "", mockHandler);
+			chs.registerContentHandler(blank, blank, mockHandler);
 			fail();
-		} catch (InvalidContentTypeException ex) {
+		} catch (InvalidCodedValueException ex) {
 			//expected
 		}
 		try {
-			chs.registerContentHandler("", null, mockHandler);
+			chs.registerContentHandler(blank, null, mockHandler);
 			fail();
-		} catch (InvalidContentTypeException ex) {
+		} catch (InvalidCodedValueException ex) {
 			//expected
 		}
 		try {
-			chs.registerContentHandler(null, "", mockHandler);
+			chs.registerContentHandler(null, blank, mockHandler);
 			fail();
-		} catch (InvalidContentTypeException ex) {
+		} catch (InvalidCodedValueException ex) {
 			//expected
 		}
 	}
@@ -414,8 +418,8 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 		ContentHandler mockHandler = mock(ContentHandler.class);
 		when(mockHandler.cloneHandler()).thenReturn(mockHandler);
 		
-		chs.registerContentHandler("testType", "testFormat", mockHandler);
-		chs.getContentHandler("testType", "testFormat");
+		chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler);
+		chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE);
 		verify(mockHandler).cloneHandler();
 	}
 
@@ -429,7 +433,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 		ContentHandlerService chs = getService();
 		
 		try {
-			chs.registerContentHandler("testType", "testFormat", null);
+			chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, null);
 			fail();
 		} catch (NullPointerException ex) {
 			//expected

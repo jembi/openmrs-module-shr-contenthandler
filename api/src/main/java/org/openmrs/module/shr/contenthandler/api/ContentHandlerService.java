@@ -82,7 +82,7 @@ public interface ContentHandlerService extends OpenmrsService {
 	 * @should Return the default handler (UnstructuredDataHandler) for an unknown content type
 	 * @should Never return null
 	 */
-	ContentHandler getContentHandler(String typeCode, String formatCode);
+	ContentHandler getContentHandler(CodedValue typeCode, CodedValue formatCode);
  
 	/**
 	 * Register a content handler for a specified type and format code.
@@ -91,13 +91,13 @@ public interface ContentHandlerService extends OpenmrsService {
 	 * <p>
 	 * 
 	 * @throws AlreadyRegisteredException if a handler is already registered for a specified type and format code
-	 * @throws InvalidContentTypeException if an invalid type or format code is specified
+	 * @throws InvalidCodedValueException if an invalid type or format code is specified
 	 * @should Register the specified handler for the specified type and format code
 	 * @should Throw an AlreadyRegisteredException if a handler is already registered for a specified type and format code
 	 * @should Throw an InvalidContentTypeException if an invalid type or format code is specified
 	 * @should Throw a NullPointerException if prototype is null
 	 */
-	void registerContentHandler(String typeCode, String formatCode, ContentHandler prototype) throws AlreadyRegisteredException, InvalidContentTypeException;
+	void registerContentHandler(CodedValue typeCode, CodedValue formatCode, ContentHandler prototype) throws AlreadyRegisteredException, InvalidCodedValueException;
     
 	/**
 	 * Deregister the current handler assigned for the specified type and format code.
@@ -108,5 +108,5 @@ public interface ContentHandlerService extends OpenmrsService {
 	 * @should Do nothing if there is no handler assigned for a specified contentType
 	 * @should Do nothing if there is an invalid content type specified
 	 */
-	void deregisterContentHandler(String typeCode, String formatCode);
+	void deregisterContentHandler(CodedValue typeCode, CodedValue formatCode);
 }

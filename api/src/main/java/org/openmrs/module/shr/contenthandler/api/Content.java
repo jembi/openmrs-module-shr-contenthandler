@@ -78,8 +78,8 @@ public final class Content implements Comparable<Content>, Serializable {
 		Z
 	}
 	
-	private final String typeCode;
-	private final String formatCode;
+	private final CodedValue typeCode;
+	private final CodedValue formatCode;
 	private final String contentType;
 	private final String encoding;
 	private final Representation representation;
@@ -94,7 +94,7 @@ public final class Content implements Comparable<Content>, Serializable {
 	 * 
 	 * @see #Content(String, boolean, String, String, String, String, Representation, CompressionFormat, Locale)
 	 */
-	public Content(String payload, String typeCode, String formatCode, String contentType) {
+	public Content(String payload, CodedValue typeCode, CodedValue formatCode, String contentType) {
 		this(payload, false, typeCode, formatCode, contentType, null, Representation.TXT, null, null);
 	}
 	
@@ -112,7 +112,7 @@ public final class Content implements Comparable<Content>, Serializable {
 	 * @param compressionFormat (Nullable) The compression algorithm used by the content
 	 * @param language			(Nullable) The content language
 	 */
-	public Content(String payload, boolean payloadIsUrl, String typeCode, String formatCode, String contentType, String encoding, Representation representation, CompressionFormat compressionFormat, Locale language) {
+	public Content(String payload, boolean payloadIsUrl, CodedValue typeCode, CodedValue formatCode, String contentType, String encoding, Representation representation, CompressionFormat compressionFormat, Locale language) {
 		this.payload = payload;
 		this.typeCode = typeCode;
 		this.formatCode = formatCode;
@@ -131,11 +131,11 @@ public final class Content implements Comparable<Content>, Serializable {
 	}
 	
 	
-	public String getTypeCode() {
+	public CodedValue getTypeCode() {
 		return typeCode;
 	}
 	
-	public String getFormatCode() {
+	public CodedValue getFormatCode() {
 		return formatCode;
 	}
 	
