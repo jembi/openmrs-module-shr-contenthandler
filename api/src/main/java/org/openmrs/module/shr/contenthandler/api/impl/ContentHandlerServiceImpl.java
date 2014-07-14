@@ -32,15 +32,17 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 	
 	protected final Log log = LogFactory.getLog(this.getClass());
 	
-	protected final Map<String, ContentHandler> handlers = new HashMap<String, ContentHandler>();
+	protected final Map<String, ContentHandler> contentTypeHandlers = new HashMap<String, ContentHandler>();
+	protected final Map<TypeFormatCode, ContentHandler> typeFormatCodeHandlers = new HashMap<TypeFormatCode, ContentHandler>();
+	
 
 	@Override
 	public ContentHandler getContentHandler(String contentType) {
-		if (contentType==null || contentType.isEmpty() || !handlers.containsKey(contentType)) {
+		if (contentType==null || contentType.isEmpty() || !contentTypeHandlers.containsKey(contentType)) {
 			return new UnstructuredDataHandler(contentType);
 		}
 		
-		return handlers.get(contentType).cloneHandler();
+		return contentTypeHandlers.get(contentType).cloneHandler();
 	}
 
 	@Override
@@ -55,11 +57,11 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 			throw new InvalidContentTypeException();
 		}
 		
-		if (handlers.containsKey(contentType)) {
+		if (contentTypeHandlers.containsKey(contentType)) {
 			throw new AlreadyRegisteredException();
 		}
 		
-		handlers.put(contentType, prototype);
+		contentTypeHandlers.put(contentType, prototype);
 	}
 	
 	private static boolean isValidContentType(String contentType) {
@@ -70,6 +72,88 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 
 	@Override
 	public void deregisterContentHandler(String contentType) {
-		handlers.remove(contentType);
+		contentTypeHandlers.remove(contentType);
+	}
+
+	@Override
+	public ContentHandler getContentHandler(String typeCode, String formatCode) {
+		if (typeCode==null || typeCode.isEmpty() ||
+			formatCode==null || formatCode.isEmpty() ||
+			!typeFormatCodeHandlers.containsKey(new TypeFormatCode(typeCode, formatCode))) {
+			return new UnstructuredDataHandler(typeCode, formatCode);
+		}
+		
+		return typeFormatCodeHandlers.get(new TypeFormatCode(typeCode, formatCode)).cloneHandler();
+	}
+
+	@Override
+	public void registerContentHandler(String typeCode, String formatCode,
+			ContentHandler prototype) throws AlreadyRegisteredException,
+			InvalidContentTypeException {
+		if (prototype==null) {
+			throw new NullPointerException();
+		}
+		
+		if (typeCode==null || typeCode.isEmpty() || formatCode==null || formatCode.isEmpty()) {
+			throw new InvalidContentTypeException();
+		}
+		
+		TypeFormatCode codes = new TypeFormatCode(typeCode, formatCode);
+		
+		if (typeFormatCodeHandlers.containsKey(codes)) {
+			throw new AlreadyRegisteredException();
+		}
+		
+		typeFormatCodeHandlers.put(codes, prototype);
+		
+	}
+
+	@Override
+	public void deregisterContentHandler(String typeCode, String formatCode) {
+		typeFormatCodeHandlers.remove(new TypeFormatCode(typeCode, formatCode));
+		
+	}
+	
+	private static class TypeFormatCode {
+		String typeCode;
+		String formatCode;
+		
+		TypeFormatCode(String typeCode, String formatCode) {
+			this.typeCode = typeCode;
+			this.formatCode = formatCode;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((formatCode == null) ? 0 : formatCode.hashCode());
+			result = prime * result
+					+ ((typeCode == null) ? 0 : typeCode.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TypeFormatCode other = (TypeFormatCode) obj;
+			if (formatCode == null) {
+				if (other.formatCode != null)
+					return false;
+			} else if (!formatCode.equals(other.formatCode))
+				return false;
+			if (typeCode == null) {
+				if (other.typeCode != null)
+					return false;
+			} else if (!typeCode.equals(other.typeCode))
+				return false;
+			return true;
+		}
 	}
 }

@@ -49,9 +49,9 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  */
 public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest {
 	
-	private static final Content TEST_CONTENT_PLAIN = new Content("This is a test string. It is awesome.", "PlainString", "text/plain");
-	private static final Content TEST_CONTENT_PLAIN2 = new Content("This is a test string. It is awesome.", "PlainString2", "text/plain");
-	private static final Content TEST_CONTENT_XML = new Content("<test>This is a test string. It is awesome.</test>", "XMLString", "text/xml");
+	private static final Content TEST_CONTENT_PLAIN = new Content("This is a test string. It is awesome.", "PlainString", "PlainString", "text/plain");
+	private static final Content TEST_CONTENT_PLAIN2 = new Content("This is a test string. It is awesome.", "PlainString2", "PlainString2", "text/plain");
+	private static final Content TEST_CONTENT_XML = new Content("<test>This is a test string. It is awesome.</test>", "XMLString", "XMLString", "text/xml");
 
 
 	@SuppressWarnings("deprecation")
@@ -73,13 +73,27 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 		assertNotNull(clone);
 		assertEquals(handler.contentType, clone.contentType);
 	}
+		
+	/**
+	 * @see UnstructuredDataHandler#cloneHandler()
+	 * @verifies return an UnstructuredDataHandler instance with the same type and format code
+	 */
+	@Test
+	public void cloneHandler_shouldReturnAnUnstructuredDataHandlerInstanceWithTheSameTypeAndFormatCode()
+			throws Exception {
+		UnstructuredDataHandler handler2 = new UnstructuredDataHandler(TEST_CONTENT_PLAIN.getTypeCode(), TEST_CONTENT_PLAIN.getFormatCode());
+		UnstructuredDataHandler clone2 = handler2.cloneHandler();
+		assertNotNull(clone2);
+		assertEquals(handler2.typeCode, clone2.typeCode);
+		assertEquals(handler2.formatCode, clone2.formatCode);
+	}
 
 	/**
 	 * @see UnstructuredDataHandler#saveContent(Patient,Provider,EncounterRole,EncounterType,Content)
 	 * @verifies contain a complex obs containing the content
 	 */
 	@Test
-	public void saveContent_shouldContainAComplexObsContainingTheContent()
+	public void saveContentByContentType_shouldContainAComplexObsContainingTheContent()
 			throws Exception {
 		Encounter res = saveTestEncounter(TEST_CONTENT_PLAIN);
 		Set<Obs> obs = res.getAllObs();
@@ -90,6 +104,25 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 		Obs theObs = obs.iterator().next();
 		assertTrue(theObs.isComplex());
 		assertEquals(TEST_CONTENT_PLAIN.getContentType(), theObs.getComplexData().getTitle());
+		assertEquals(TEST_CONTENT_PLAIN, theObs.getComplexData().getData());
+	}
+	
+	/**
+	 * @see UnstructuredDataHandler#saveContent(Patient,Provider,EncounterRole,EncounterType,Content)
+	 * @verifies contain a complex obs containing the content
+	 */
+	@Test
+	public void saveContentByTypeAndFormatCode_shouldContainAComplexObsContainingTheContent()
+			throws Exception {
+		Encounter res = saveTestEncounter(TEST_CONTENT_PLAIN, true);
+		Set<Obs> obs = res.getAllObs();
+		
+		assertNotNull(obs);
+		assertEquals(obs.size(), 1);
+		
+		Obs theObs = obs.iterator().next();
+		assertTrue(theObs.isComplex());
+		assertEquals(TEST_CONTENT_PLAIN.getTypeCode() + ":" + TEST_CONTENT_PLAIN.getFormatCode(), theObs.getComplexData().getTitle());
 		assertEquals(TEST_CONTENT_PLAIN, theObs.getComplexData().getData());
 	}
 
@@ -383,7 +416,20 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	}
 	
 	private Encounter saveTestEncounter(Content content, int typeId) {
-		UnstructuredDataHandler handler = new UnstructuredDataHandler(content.getContentType());
+		return saveTestEncounter(content, typeId, false);
+	}
+	
+	private Encounter saveTestEncounter(Content content, boolean useTypeAndFormatCode) {
+		return saveTestEncounter(content, 1, useTypeAndFormatCode);
+	}
+	
+	private Encounter saveTestEncounter(Content content, int typeId, boolean useTypeAndFormatCode) {
+		UnstructuredDataHandler handler = null;
+		if (useTypeAndFormatCode) {
+			handler = new UnstructuredDataHandler(content.getTypeCode(), content.getFormatCode());
+		} else {
+			handler = new UnstructuredDataHandler(content.getContentType());
+		}
 		
 		Patient patient = Context.getPatientService().getPatient(2);
 		Provider provider = Context.getProviderService().getProvider(1);

@@ -51,10 +51,27 @@ public class UnstructuredDataHandler implements ContentHandler {
 	protected static final String UNSTRUCTURED_DATA_HANDLER_GLOBAL_PROP = "shr.contenthandler.unstructureddatahandler.key";
 	
 	protected final String contentType;
+	protected final String typeCode;
+	protected final String formatCode;
 	
+	
+	/**
+	 * Construct a new unstructured data handler that references content via content type
+	 */
 	public UnstructuredDataHandler(String contentType) {
 		this.contentType = contentType;
+		typeCode = formatCode = null;
 	}
+	
+	/**
+	 * Construct a new unstructured data handler that references content via type and format code
+	 */
+	public UnstructuredDataHandler(String typeCode, String formatCode) {
+		this.typeCode = typeCode;
+		this.formatCode = formatCode;
+		this.contentType = null;
+	}
+
 
 	/**
 	 * @see ContentHandler#saveContent(Patient, Provider, EncounterRole, EncounterType, Content)
@@ -88,7 +105,7 @@ public class UnstructuredDataHandler implements ContentHandler {
 	
 	private Obs createUnstructuredDataObs(Content content) {
 		Obs res = new Obs();
-		ComplexData cd = new ComplexData(contentType, content);
+		ComplexData cd = new ComplexData(buildTitle(), content);
 		
 		res.setConcept(getUnstructuredAttachmentConcept(content.getFormatCode()));
 		res.setComplexData(cd);
@@ -220,7 +237,10 @@ public class UnstructuredDataHandler implements ContentHandler {
 					continue;
 				}
 				
-				if (((Content)data).getContentType().equals(contentType)) {
+				String contentTitle = contentType!=null ? (((Content)data).getContentType()) :
+					((Content)data).getTypeCode() + ":" + ((Content)data).getFormatCode();
+					
+				if (contentTitle.equals(buildTitle())) {
 					dst.add((Content)data);
 				}
 			}
@@ -230,6 +250,13 @@ public class UnstructuredDataHandler implements ContentHandler {
 	private boolean isConceptAnUnstructuredDataType(Concept c) {
 		return c.getName().getName().startsWith(UNSTRUCTURED_ATTACHMENT_CONCEPT_BASE_NAME);
 	}
+	
+	/**
+	 * Build a title that's suitable for referencing the complex obs
+	 */
+	private String buildTitle() {
+		return contentType!=null ? contentType : typeCode + ":" + formatCode;
+	}
 
 	/**
 	 * @see ContentHandler#cloneHandler()
@@ -237,6 +264,10 @@ public class UnstructuredDataHandler implements ContentHandler {
 	 */
 	@Override
 	public UnstructuredDataHandler cloneHandler() {
-		return new UnstructuredDataHandler(contentType);
+		if (contentType!=null) {
+			return new UnstructuredDataHandler(contentType);
+		} else {
+			return new UnstructuredDataHandler(typeCode, formatCode);
+		}
 	}
 }
