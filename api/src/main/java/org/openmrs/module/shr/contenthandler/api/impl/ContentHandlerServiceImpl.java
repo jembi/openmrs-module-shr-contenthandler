@@ -138,23 +138,29 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
+			if (this == obj) {
 				return true;
-			if (obj == null)
+			}
+			if (obj == null) {
 				return false;
-			if (getClass() != obj.getClass())
+			}
+			if (getClass() != obj.getClass()) {
 				return false;
+			}
 			TypeFormatCode other = (TypeFormatCode) obj;
 			if (formatCode == null) {
-				if (other.formatCode != null)
+				if (other.formatCode != null) {
 					return false;
+				}
 			} else if (!formatCode.equals(other.formatCode))
 				return false;
 			if (typeCode == null) {
-				if (other.typeCode != null)
+				if (other.typeCode != null) {
 					return false;
-			} else if (!typeCode.equals(other.typeCode))
+				}
+			} else if (!typeCode.equals(other.typeCode)) {
 				return false;
+			}
 			return true;
 		}
 	}
