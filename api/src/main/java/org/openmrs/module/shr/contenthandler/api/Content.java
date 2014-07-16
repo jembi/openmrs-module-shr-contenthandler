@@ -32,7 +32,7 @@ public final class Content implements Comparable<Content>, Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 76112365244123275L;
+	private static final long serialVersionUID = 0L;
 
 
 	public static enum Representation {

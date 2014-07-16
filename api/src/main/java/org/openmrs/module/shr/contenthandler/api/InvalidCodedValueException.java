@@ -15,7 +15,7 @@ package org.openmrs.module.shr.contenthandler.api;
 
 public class InvalidCodedValueException extends Exception {
 
-	private static final long serialVersionUID = 2988913580776946903L;
+	private static final long serialVersionUID = 0L;
 	
 	public InvalidCodedValueException() { super("Invalid coded value"); }
 	public InvalidCodedValueException(String msg) { super(msg); }

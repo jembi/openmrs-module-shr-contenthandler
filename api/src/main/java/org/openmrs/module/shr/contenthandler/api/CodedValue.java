@@ -19,7 +19,7 @@ public final class CodedValue implements Comparable<CodedValue>, Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4638562168981161880L;
+	private static final long serialVersionUID = 0L;
 	
 	
 	private final String code;
