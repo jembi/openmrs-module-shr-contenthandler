@@ -439,4 +439,26 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 			//expected
 		}
 	}
+
+	/**
+	 * @see ContentHandlerService#getDefaultHandler(CodedValue,CodedValue)
+	 * @verifies Return the default handler (UnstructuredDataHandler)
+	 */
+	@Test
+	public void getDefaultHandler_contentType_shouldReturnTheDefaultHandlerUnstructuredDataHandler()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		assertTrue(chs.getDefaultHandler("text/xml") instanceof UnstructuredDataHandler);
+	}
+
+	/**
+	 * @see ContentHandlerService#getDefaultHandler(String)
+	 * @verifies Return the default handler (UnstructuredDataHandler)
+	 */
+	@Test
+	public void getDefaultHandler_tfCodes_shouldReturnTheDefaultHandlerUnstructuredDataHandler()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		assertTrue(chs.getDefaultHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) instanceof UnstructuredDataHandler);
+	}
 }

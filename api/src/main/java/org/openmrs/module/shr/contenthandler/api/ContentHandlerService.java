@@ -109,4 +109,21 @@ public interface ContentHandlerService extends OpenmrsService {
 	 * @should Do nothing if there is an invalid content type specified
 	 */
 	void deregisterContentHandler(CodedValue typeCode, CodedValue formatCode);
+	
+	
+	/**
+	 * Get an instance of the default handler for a specific content type.
+	 * 
+	 * @return The default handler
+	 * @should Return the default handler (UnstructuredDataHandler)
+	 */
+	ContentHandler getDefaultHandler(String contentType);
+	
+	/**
+	 * Get an instance of the default handler for a specific type and format code.
+	 * 
+	 * @return The default handler
+	 * @should Return the default handler (UnstructuredDataHandler)
+	 */
+	ContentHandler getDefaultHandler(CodedValue typeCode, CodedValue formatCode);
 }

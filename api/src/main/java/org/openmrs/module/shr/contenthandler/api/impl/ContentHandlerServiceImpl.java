@@ -41,7 +41,7 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 	@Override
 	public ContentHandler getContentHandler(String contentType) {
 		if (contentType==null || contentType.isEmpty() || !contentTypeHandlers.containsKey(contentType)) {
-			return new UnstructuredDataHandler(contentType);
+			return getDefaultHandler(contentType);
 		}
 		
 		return contentTypeHandlers.get(contentType).cloneHandler();
@@ -82,7 +82,7 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 		if (typeCode==null || typeCode.getCode().isEmpty() || typeCode.getCodingScheme().isEmpty() ||
 			formatCode==null || formatCode.getCode().isEmpty() || formatCode.getCodingScheme().isEmpty() ||
 			!typeFormatCodeHandlers.containsKey(new TypeFormatCode(typeCode, formatCode))) {
-			return new UnstructuredDataHandler(typeCode, formatCode);
+			return getDefaultHandler(typeCode, formatCode);
 		}
 		
 		return typeFormatCodeHandlers.get(new TypeFormatCode(typeCode, formatCode)).cloneHandler();
@@ -163,5 +163,16 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 			}
 			return true;
 		}
+	}
+
+	
+	@Override
+	public ContentHandler getDefaultHandler(String contentType) {
+		return new UnstructuredDataHandler(contentType);
+	}
+
+	@Override
+	public ContentHandler getDefaultHandler(CodedValue typeCode, CodedValue formatCode) {
+		return new UnstructuredDataHandler(typeCode, formatCode);
 	}
 }
