@@ -25,6 +25,9 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  */
 public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	
+	private static final CodedValue TEST_TYPE_CODE = new CodedValue("testType", "test", "test");
+	private static final CodedValue TEST_FORMAT_CODE = new CodedValue("testFormat", "test", "test");
+	
 	@Test
 	public void shouldSetupContext() {
 		assertNotNull(Context.getService(ContentHandlerService.class));
@@ -33,8 +36,12 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	private ContentHandlerService getService() {
 		ContentHandlerService chs = Context.getService(ContentHandlerService.class);
 		chs.deregisterContentHandler("text/plain");
+		chs.deregisterContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE);
 		return chs;
 	}
+	
+	
+	/* Content type */
 
 	/**
 	 * @see ContentHandlerService#deregisterContentHandler(String)
@@ -229,5 +236,229 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 		} catch (NullPointerException ex) {
 			//expected
 		}
+	}
+	
+	
+	/* Type and format code */
+	
+	/**
+	 * @see ContentHandlerService#deregisterContentHandler(String, String)
+	 * @verifies Deregister the handler assigned to specified type and format code
+	 */
+	@Test
+	public void deregisterContentHandler_tfCode_shouldDeregisterTheHandlerAssignedForToSpecifiedContentType()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		
+		ContentHandler mockHandler = mock(ContentHandler.class);
+		when(mockHandler.cloneHandler()).thenReturn(mockHandler);
+		
+		chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler);
+		assertTrue(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) == mockHandler);
+		
+		chs.deregisterContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE);
+		assertTrue(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) != mockHandler);
+	}
+
+	/**
+	 * @see ContentHandlerService#deregisterContentHandler(String, String)
+	 * @verifies Do nothing if there is no handler assigned for a specified type and format code
+	 */
+	@Test
+	public void deregisterContentHandler_tfCode_shouldDoNothingIfThereIsNoHandlerAssignedForASpecifiedContentType()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		
+		chs.deregisterContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE);
+	}
+
+	/**
+	 * @see ContentHandlerService#getContentHandler(String, String)
+	 * @verifies Get an appropriate content handler for a specified type and format code
+	 */
+	@Test
+	public void getContentHandler_tfCode_shouldGetAnAppropriateContentHandlerForASpecifiedContentType()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		
+		ContentHandler mockHandler = mock(ContentHandler.class);
+		when(mockHandler.cloneHandler()).thenReturn(mockHandler);
+		
+		chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler);
+		assertTrue(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) == mockHandler);
+	}
+
+	/**
+	 * @see ContentHandlerService#getContentHandler(String, String)
+	 * @verifies Return the default handler (UnstructuredDataHandler) for an unknown type and format code
+	 */
+	@Test
+	public void getContentHandler_tfCode_shouldReturnTheDefaultHandlerUnstructuredDataHandlerForAnUnknownContentType()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		
+		assertTrue(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) instanceof UnstructuredDataHandler);
+	}
+
+	/**
+	 * @see ContentHandlerService#getContentHandler(String,String)
+	 * @verifies Never return null
+	 */
+	@Test
+	public void getContentHandler_tfCode_shouldNeverReturnNull() throws Exception {
+		ContentHandlerService chs = getService();
+		
+		assertNotNull(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE));
+		
+		ContentHandler mockHandler = mock(ContentHandler.class);
+		chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler);
+		when(mockHandler.cloneHandler()).thenReturn(mockHandler);
+		assertNotNull(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE));
+	}
+
+	/**
+	 * @see ContentHandlerService#registerContentHandler(String,String,ContentHandler)
+	 * @verifies Register the specified handler for the specified type and format code
+	 */
+	@Test
+	public void registerContentHandler_tfCode_shouldRegisterTheSpecifiedHandlerForTheSpecifiedContentType()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		
+		ContentHandler mockHandler = mock(ContentHandler.class);
+		when(mockHandler.cloneHandler()).thenReturn(mockHandler);
+		
+		assertTrue(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) != mockHandler);
+		chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler);
+		assertTrue(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) == mockHandler);
+	}
+
+	/**
+	 * @see ContentHandlerService#registerContentHandler(String,String,ContentHandler)
+	 * @verifies Throw an AlreadyRegisteredException if a handler is already registered for a specified type and format code
+	 */
+	@Test
+	public void registerContentHandler_tfCode_shouldThrowAnAlreadyRegisteredExceptionIfAHandlerIsAlreadyRegisteredForASpecifiedContentType()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		
+		ContentHandler mockHandler = mock(ContentHandler.class);
+		when(mockHandler.cloneHandler()).thenReturn(mockHandler);
+		ContentHandler mockHandler2 = mock(ContentHandler.class);
+		
+		chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler);
+		try {
+			chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler2);
+			fail();
+		} catch (AlreadyRegisteredException ex) {
+			//expected
+		}
+	}
+
+	/**
+	 * @see ContentHandlerService#deregisterContentHandler(String,String)
+	 * @verifies Do nothing if there is an invalid type and format code specified
+	 */
+	@Test
+	public void deregisterContentHandler_tfCode_shouldDoNothingIfThereIsAnInvalidContentTypeSpecified()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		
+		chs.deregisterContentHandler(null);
+		chs.deregisterContentHandler("");
+		chs.deregisterContentHandler("this isn't valid");
+	}
+
+	/**
+	 * @see ContentHandlerService#registerContentHandler(String,String,ContentHandler)
+	 * @verifies Throw an InvalidCodedTypeException if an invalid type and format code is specified
+	 */
+	@Test
+	public void registerContentHandler_tfCode_shouldThrowAnInvalidContentTypeExceptionIfAnInvalidContentTypeIsSpecified()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		CodedValue blank = new CodedValue("", "");
+		
+		ContentHandler mockHandler = mock(ContentHandler.class);
+		try {
+			chs.registerContentHandler(null, null, mockHandler);
+			fail();
+		} catch (InvalidCodedValueException ex) {
+			//expected
+		}
+		try {
+			chs.registerContentHandler(blank, blank, mockHandler);
+			fail();
+		} catch (InvalidCodedValueException ex) {
+			//expected
+		}
+		try {
+			chs.registerContentHandler(blank, null, mockHandler);
+			fail();
+		} catch (InvalidCodedValueException ex) {
+			//expected
+		}
+		try {
+			chs.registerContentHandler(null, blank, mockHandler);
+			fail();
+		} catch (InvalidCodedValueException ex) {
+			//expected
+		}
+	}
+
+	/**
+	 * @see ContentHandlerService#getContentHandler(String,String)
+	 * @verifies Return a clone of the requested handler using the handler's cloneHandler method
+	 */
+	@Test
+	public void getContentHandler_tfCode_shouldReturnACloneOfTheRequestedHandlerUsingTheHandlersCloneHandlerMethod()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		
+		ContentHandler mockHandler = mock(ContentHandler.class);
+		when(mockHandler.cloneHandler()).thenReturn(mockHandler);
+		
+		chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler);
+		chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE);
+		verify(mockHandler).cloneHandler();
+	}
+
+	/**
+	 * @see ContentHandlerService#registerContentHandler(String,String,ContentHandler)
+	 * @verifies Throw a NullPointerException if prototype is null
+	 */
+	@Test
+	public void registerContentHandler_tfCode_shouldThrowANullPointerExceptionIfPrototypeIsNull()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		
+		try {
+			chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, null);
+			fail();
+		} catch (NullPointerException ex) {
+			//expected
+		}
+	}
+
+	/**
+	 * @see ContentHandlerService#getDefaultHandler(CodedValue,CodedValue)
+	 * @verifies Return the default handler (UnstructuredDataHandler)
+	 */
+	@Test
+	public void getDefaultHandler_contentType_shouldReturnTheDefaultHandlerUnstructuredDataHandler()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		assertTrue(chs.getDefaultHandler("text/xml") instanceof UnstructuredDataHandler);
+	}
+
+	/**
+	 * @see ContentHandlerService#getDefaultHandler(String)
+	 * @verifies Return the default handler (UnstructuredDataHandler)
+	 */
+	@Test
+	public void getDefaultHandler_tfCodes_shouldReturnTheDefaultHandlerUnstructuredDataHandler()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		assertTrue(chs.getDefaultHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) instanceof UnstructuredDataHandler);
 	}
 }

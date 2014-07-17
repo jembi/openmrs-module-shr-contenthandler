@@ -22,7 +22,7 @@ import org.openmrs.module.shr.contenthandler.DataUtil;
 /**
  * A text based data payload.
  * <p>
- * This class follows the HL7 specification for ED datatypes (Encapsulated Data), but with the addition of a format code field.
+ * This class follows the HL7 specification for ED datatypes (Encapsulated Data), but with the addition of both a type and format code field.
  * <p>
  * The format code is a globally unique code identifying the format of the content and is determined as part of the implementation
  * (e.g. IHE specifies various format codes for use with XDS documents).
@@ -32,7 +32,7 @@ public final class Content implements Comparable<Content>, Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -2101280624666285488L;
+	private static final long serialVersionUID = 0L;
 
 
 	public static enum Representation {
@@ -78,7 +78,8 @@ public final class Content implements Comparable<Content>, Serializable {
 		Z
 	}
 	
-	private final String formatCode;
+	private final CodedValue typeCode;
+	private final CodedValue formatCode;
 	private final String contentType;
 	private final String encoding;
 	private final Representation representation;
@@ -91,10 +92,10 @@ public final class Content implements Comparable<Content>, Serializable {
 	/**
 	 * Creates a new Content object with a simple text payload. Good if the payload is an XML document for example.
 	 * 
-	 * @see #Content(String, boolean, String, String, String, Representation, CompressionFormat, Locale)
+	 * @see #Content(String, boolean, String, String, String, String, Representation, CompressionFormat, Locale)
 	 */
-	public Content(String payload, String formatCode, String contentType) {
-		this(payload, false, formatCode, contentType, null, Representation.TXT, null, null);
+	public Content(String payload, CodedValue typeCode, CodedValue formatCode, String contentType) {
+		this(payload, false, typeCode, formatCode, contentType, null, Representation.TXT, null, null);
 	}
 	
 	/**
@@ -103,6 +104,7 @@ public final class Content implements Comparable<Content>, Serializable {
 	 * @param payload			The payload can either contain the content or a url referencing the content's location
 	 * @param payloadIsUrl		The payload contains a URL string referencing a location where the content can be retrieved from.
 	 * Note that the other metadata (e.g. content type) applies to the data, not the payload (i.e. the url string)
+	 * @param typeCode			The content type code
 	 * @param formatCode		The content format code
 	 * @param contentType		The content MIME type
 	 * @param encoding			(Nullable) The character set used for the content
@@ -110,8 +112,9 @@ public final class Content implements Comparable<Content>, Serializable {
 	 * @param compressionFormat (Nullable) The compression algorithm used by the content
 	 * @param language			(Nullable) The content language
 	 */
-	public Content(String payload, boolean payloadIsUrl, String formatCode, String contentType, String encoding, Representation representation, CompressionFormat compressionFormat, Locale language) {
+	public Content(String payload, boolean payloadIsUrl, CodedValue typeCode, CodedValue formatCode, String contentType, String encoding, Representation representation, CompressionFormat compressionFormat, Locale language) {
 		this.payload = payload;
+		this.typeCode = typeCode;
 		this.formatCode = formatCode;
 		this.contentType = contentType;
 		this.encoding = encoding;
@@ -128,7 +131,11 @@ public final class Content implements Comparable<Content>, Serializable {
 	}
 	
 	
-	public String getFormatCode() {
+	public CodedValue getTypeCode() {
+		return typeCode;
+	}
+	
+	public CodedValue getFormatCode() {
 		return formatCode;
 	}
 	

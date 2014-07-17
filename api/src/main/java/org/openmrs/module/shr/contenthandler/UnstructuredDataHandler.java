@@ -35,6 +35,7 @@ import org.openmrs.Provider;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.shr.contenthandler.api.CodedValue;
 import org.openmrs.module.shr.contenthandler.api.Content;
 import org.openmrs.module.shr.contenthandler.api.ContentHandler;
 import org.openmrs.obs.ComplexData;
@@ -51,10 +52,27 @@ public class UnstructuredDataHandler implements ContentHandler {
 	protected static final String UNSTRUCTURED_DATA_HANDLER_GLOBAL_PROP = "shr.contenthandler.unstructureddatahandler.key";
 	
 	protected final String contentType;
+	protected final CodedValue typeCode;
+	protected final CodedValue formatCode;
 	
+	
+	/**
+	 * Construct a new unstructured data handler that references content via content type
+	 */
 	public UnstructuredDataHandler(String contentType) {
 		this.contentType = contentType;
+		typeCode = formatCode = null;
 	}
+	
+	/**
+	 * Construct a new unstructured data handler that references content via type and format code
+	 */
+	public UnstructuredDataHandler(CodedValue typeCode, CodedValue formatCode) {
+		this.typeCode = typeCode;
+		this.formatCode = formatCode;
+		this.contentType = null;
+	}
+
 
 	/**
 	 * @see ContentHandler#saveContent(Patient, Provider, EncounterRole, EncounterType, Content)
@@ -88,7 +106,7 @@ public class UnstructuredDataHandler implements ContentHandler {
 	
 	private Obs createUnstructuredDataObs(Content content) {
 		Obs res = new Obs();
-		ComplexData cd = new ComplexData(contentType, content);
+		ComplexData cd = new ComplexData(buildTitle(), content);
 		
 		res.setConcept(getUnstructuredAttachmentConcept(content.getFormatCode()));
 		res.setComplexData(cd);
@@ -97,7 +115,7 @@ public class UnstructuredDataHandler implements ContentHandler {
 		return res;
 	}
 
-	private Concept getUnstructuredAttachmentConcept(String formatCode) {
+	private Concept getUnstructuredAttachmentConcept(CodedValue formatCode) {
 		ConceptService cs = Context.getConceptService();
 		String conceptName = getUnstructuredAttachmentConceptName(formatCode);
 		Concept res = cs.getConceptByName(conceptName);
@@ -108,8 +126,8 @@ public class UnstructuredDataHandler implements ContentHandler {
 		return res;
 	}
 	
-	private static String getUnstructuredAttachmentConceptName(String formatCode) {
-		return String.format("%s (%s)", UNSTRUCTURED_ATTACHMENT_CONCEPT_BASE_NAME, formatCode);
+	private static String getUnstructuredAttachmentConceptName(CodedValue formatCode) {
+		return String.format("%s (%s-%s)", UNSTRUCTURED_ATTACHMENT_CONCEPT_BASE_NAME, formatCode.getCodingScheme(), formatCode.getCode());
 	}
 	
 	private Concept buildUnstructuredAttachmentConcept(String name) {
@@ -220,7 +238,10 @@ public class UnstructuredDataHandler implements ContentHandler {
 					continue;
 				}
 				
-				if (((Content)data).getContentType().equals(contentType)) {
+				String contentTitle = contentType!=null ? (((Content)data).getContentType()) :
+					buildTypeFormatCodeTitle(((Content)data).getTypeCode(), ((Content)data).getFormatCode());
+					
+				if (contentTitle.equals(buildTitle())) {
 					dst.add((Content)data);
 				}
 			}
@@ -230,6 +251,18 @@ public class UnstructuredDataHandler implements ContentHandler {
 	private boolean isConceptAnUnstructuredDataType(Concept c) {
 		return c.getName().getName().startsWith(UNSTRUCTURED_ATTACHMENT_CONCEPT_BASE_NAME);
 	}
+	
+	/**
+	 * Build a title that's suitable for referencing the complex obs
+	 */
+	private String buildTitle() {
+		return contentType!=null ? contentType : buildTypeFormatCodeTitle(typeCode, formatCode);
+	}
+	
+	protected static String buildTypeFormatCodeTitle(CodedValue typeCode, CodedValue formatCode) {
+		//Use the formatCode code as the title
+		return formatCode.getCode();
+	}
 
 	/**
 	 * @see ContentHandler#cloneHandler()
@@ -237,6 +270,10 @@ public class UnstructuredDataHandler implements ContentHandler {
 	 */
 	@Override
 	public UnstructuredDataHandler cloneHandler() {
-		return new UnstructuredDataHandler(contentType);
+		if (contentType!=null) {
+			return new UnstructuredDataHandler(contentType);
+		} else {
+			return new UnstructuredDataHandler(typeCode, formatCode);
+		}
 	}
 }

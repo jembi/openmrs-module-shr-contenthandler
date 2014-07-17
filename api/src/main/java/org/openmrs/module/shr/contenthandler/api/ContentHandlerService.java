@@ -69,4 +69,61 @@ public interface ContentHandlerService extends OpenmrsService {
 	 * @should Do nothing if there is an invalid content type specified
 	 */
 	void deregisterContentHandler(String contentType);
+	
+	/**
+	 * Returns a content handler for a specified type and format code.
+	 * Will return a default handler for unknown types.
+	 * <p>
+	 * @see #getContentHandler(String)
+	 * 
+	 * @return An appropriate content handler for a specified content type
+	 * @should Get an appropriate content handler for a specified content type
+	 * @should Return a clone of the requested handler using the handler's cloneHandler method
+	 * @should Return the default handler (UnstructuredDataHandler) for an unknown content type
+	 * @should Never return null
+	 */
+	ContentHandler getContentHandler(CodedValue typeCode, CodedValue formatCode);
+ 
+	/**
+	 * Register a content handler for a specified type and format code.
+	 * <p>
+	 * @see #registerContentHandler(String, ContentHandler)
+	 * <p>
+	 * 
+	 * @throws AlreadyRegisteredException if a handler is already registered for a specified type and format code
+	 * @throws InvalidCodedValueException if an invalid type or format code is specified
+	 * @should Register the specified handler for the specified type and format code
+	 * @should Throw an AlreadyRegisteredException if a handler is already registered for a specified type and format code
+	 * @should Throw an InvalidContentTypeException if an invalid type or format code is specified
+	 * @should Throw a NullPointerException if prototype is null
+	 */
+	void registerContentHandler(CodedValue typeCode, CodedValue formatCode, ContentHandler prototype) throws AlreadyRegisteredException, InvalidCodedValueException;
+    
+	/**
+	 * Deregister the current handler assigned for the specified type and format code.
+	 * <p>
+	 * @see #deregisterContentHandler(String)
+	 * 
+	 * @should Deregister the handler assigned for to specified contentType
+	 * @should Do nothing if there is no handler assigned for a specified contentType
+	 * @should Do nothing if there is an invalid content type specified
+	 */
+	void deregisterContentHandler(CodedValue typeCode, CodedValue formatCode);
+	
+	
+	/**
+	 * Get an instance of the default handler for a specific content type.
+	 * 
+	 * @return The default handler
+	 * @should Return the default handler (UnstructuredDataHandler)
+	 */
+	ContentHandler getDefaultHandler(String contentType);
+	
+	/**
+	 * Get an instance of the default handler for a specific type and format code.
+	 * 
+	 * @return The default handler
+	 * @should Return the default handler (UnstructuredDataHandler)
+	 */
+	ContentHandler getDefaultHandler(CodedValue typeCode, CodedValue formatCode);
 }

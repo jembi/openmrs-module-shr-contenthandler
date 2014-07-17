@@ -34,6 +34,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 public class ContentTest {
 	
 	private static final String TEST_DATA = "<test>This is a test string. It is awesome.</test>";
+	private static final CodedValue TEST_CODE = new CodedValue("xml", "xml", "xml");
 	
 	@Rule
 	public WireMockRule wireMockRule = new WireMockRule(8001);
@@ -56,7 +57,7 @@ public class ContentTest {
 	public void getRawData_shouldDecodeTheDataIfItIsBase64Encoded()
 			throws Exception {
 		String encoded = Base64.encodeBase64String(TEST_DATA.getBytes());
-		Content content = new Content(encoded, false, "xml", "text/xml", null, Representation.B64, null, null);
+		Content content = new Content(encoded, false, TEST_CODE, TEST_CODE, "text/xml", null, Representation.B64, null, null);
 		assertEquals(TEST_DATA, new String(content.getRawData()));
 	}
 
@@ -74,7 +75,7 @@ public class ContentTest {
 	
 	private void testCompressedPayload(byte[] compressedPayload, CompressionFormat format) throws IOException {
 		String payload = Base64.encodeBase64String(compressedPayload);
-		Content content = new Content(payload, false, "xml", "text/xml", null, Representation.B64, format, null);
+		Content content = new Content(payload, false, TEST_CODE, TEST_CODE, "text/xml", null, Representation.B64, format, null);
 		assertEquals(TEST_DATA, new String(content.getRawData()));
 	}
 
@@ -87,12 +88,12 @@ public class ContentTest {
 			throws Exception {
 		//Plain text
 		setupContentMockService(TEST_DATA.getBytes());
-		Content content = new Content("http://localhost:8001/resource", true, "xml", "text/xml", null, Representation.TXT, null, null);
+		Content content = new Content("http://localhost:8001/resource", true, TEST_CODE, TEST_CODE, "text/xml", null, Representation.TXT, null, null);
 		assertEquals(TEST_DATA, new String(content.getRawData()));
 		
 		//Base64
 		setupContentMockService(Base64.encodeBase64(TEST_DATA.getBytes()));
-		content = new Content("http://localhost:8001/resource", true, "xml", "text/xml", null, Representation.B64, null, null);
+		content = new Content("http://localhost:8001/resource", true, TEST_CODE, TEST_CODE, "text/xml", null, Representation.B64, null, null);
 		assertEquals(TEST_DATA, new String(content.getRawData()));
 		
 		//Compressed
@@ -106,13 +107,13 @@ public class ContentTest {
 	
 	private void testCompressedURL(byte[] compressedPayload, CompressionFormat format) throws IOException {
 		setupContentMockService(Base64.encodeBase64(compressedPayload));
-		Content content = new Content("http://localhost:8001/resource", true, "xml", "text/xml", null, Representation.B64, format, null);
+		Content content = new Content("http://localhost:8001/resource", true, TEST_CODE, TEST_CODE, "text/xml", null, Representation.B64, format, null);
 		assertEquals(TEST_DATA, new String(content.getRawData()));
 	}
 	
 	private void testCompressedURL_nonBase64(byte[] compressedPayload, CompressionFormat format) throws IOException {
 		setupContentMockService(compressedPayload);
-		Content content = new Content("http://localhost:8001/resource", true, "xml", "text/xml", null, Representation.BINARY, format, null);
+		Content content = new Content("http://localhost:8001/resource", true, TEST_CODE, TEST_CODE, "text/xml", null, Representation.BINARY, format, null);
 		assertEquals(TEST_DATA, new String(content.getRawData()));
 	}
 
@@ -123,7 +124,7 @@ public class ContentTest {
 	@Test
 	public void getRawData_shouldReturnThePayloadStringAsAByteArrayIfItsNotEncodedOrCompressed()
 			throws Exception {
-		Content content = new Content(TEST_DATA, "xml", "text/xml");
+		Content content = new Content(TEST_DATA, TEST_CODE, TEST_CODE, "text/xml");
 		assertEquals(TEST_DATA, new String(content.getRawData()));
 	}
 	

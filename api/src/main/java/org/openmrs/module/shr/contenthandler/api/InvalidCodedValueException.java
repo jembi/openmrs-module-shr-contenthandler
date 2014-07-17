@@ -13,11 +13,10 @@
  */
 package org.openmrs.module.shr.contenthandler.api;
 
-public class AlreadyRegisteredException extends Exception {
+public class InvalidCodedValueException extends Exception {
 
 	private static final long serialVersionUID = 0L;
-
-	public AlreadyRegisteredException() {}
-	public AlreadyRegisteredException(String msg) { super(msg); }
-	public AlreadyRegisteredException(Throwable ex) { super(ex); }
+	
+	public InvalidCodedValueException() { super("Invalid coded value"); }
+	public InvalidCodedValueException(String msg) { super(msg); }
 }
