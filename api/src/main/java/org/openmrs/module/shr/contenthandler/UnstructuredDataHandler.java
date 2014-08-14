@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -80,8 +82,8 @@ public class UnstructuredDataHandler implements ContentHandler {
 	 * @should contain a complex obs containing the content
 	 */
 	@Override
-	public Encounter saveContent(Patient patient, Provider provider, EncounterRole role, EncounterType encounterType, Content content) {
-		Encounter enc = createEncounter(patient, provider, role, encounterType, content);
+	public Encounter saveContent(Patient patient, Map<EncounterRole, Set<Provider>> providersByRole, EncounterType encounterType, Content content) {
+		Encounter enc = createEncounter(patient, providersByRole, encounterType, content);
 		Context.getEncounterService().saveEncounter(enc);
 		return enc;
 	}
@@ -89,7 +91,7 @@ public class UnstructuredDataHandler implements ContentHandler {
 	/**
 	 * Create a new encounter object with a complex obs for storing the specified content. 
 	 */
-	private Encounter createEncounter(Patient patient, Provider provider, EncounterRole role, EncounterType encounterType, Content content) {
+	private Encounter createEncounter(Patient patient, Map<EncounterRole, Set<Provider>> providersByRole, EncounterType encounterType, Content content) {
 		Encounter enc = new Encounter();
 		
 		enc.setEncounterType(encounterType);
@@ -99,7 +101,14 @@ public class UnstructuredDataHandler implements ContentHandler {
 		enc.addObs(obs);
 		enc.setEncounterDatetime(obs.getObsDatetime());
 		enc.setPatient(patient);
-		enc.setProvider(role, provider);
+		
+		// Add all providers to encounter
+		for (EncounterRole role : providersByRole.keySet()) {
+			Set<Provider> providers = providersByRole.get(role);
+			for (Provider provider : providers) {
+				enc.addProvider(role, provider);
+			}
+		}
 		
 		return enc;
 	}
