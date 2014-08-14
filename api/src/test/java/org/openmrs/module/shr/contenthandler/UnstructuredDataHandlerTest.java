@@ -13,13 +13,17 @@
  */
 package org.openmrs.module.shr.contenthandler;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -442,7 +446,12 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 		EncounterRole role = Context.getEncounterService().getEncounterRole(1);
 		EncounterType type = Context.getEncounterService().getEncounterType(typeId);
 		
-		Encounter res = handler.saveContent(patient, provider, role, type, content);
+		Map<EncounterRole, Set<Provider>> providersByRole = new HashMap<EncounterRole, Set<Provider>>();
+		Set<Provider> providers = new HashSet<Provider>();
+		providers.add(provider);
+		providersByRole.put(role, providers);
+		
+		Encounter res = handler.saveContent(patient, providersByRole, type, content);
 		
 		//Workaround for the testing obs handler, see InMemoryComplexObsHandler#saveObs
 		for (Obs obs : res.getAllObs()) {

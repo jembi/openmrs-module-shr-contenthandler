@@ -15,6 +15,8 @@ package org.openmrs.module.shr.contenthandler.api;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.openmrs.Encounter;
 import org.openmrs.EncounterRole;
@@ -40,13 +42,12 @@ public interface ContentHandler {
 	 * Parse and store clinical content for the specified patient.
 	 * 
 	 * @param patient The patient associated with the content
-	 * @param provider The clinical provider associated with the content
-	 * @param role The encounter role associated with the content
+	 * @param providersByRole The clinical providers associated with this content mapped by their role
 	 * @param encounterType The encounter type
 	 * @param content The encounter data
 	 * @return The created and saved encounter object
 	 */
-	Encounter saveContent(Patient patient, Provider provider, EncounterRole role, EncounterType encounterType, Content content);
+	Encounter saveContent(Patient patient, Map<EncounterRole, Set<Provider>> providersByRole, EncounterType encounterType, Content content);
 
 	/**
 	 * Retrieve the content associated with the specified encounter uuid.
