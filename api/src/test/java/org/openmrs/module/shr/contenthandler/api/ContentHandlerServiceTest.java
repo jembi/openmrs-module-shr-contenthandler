@@ -95,30 +95,11 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	 * @verifies Return the default handler (UnstructuredDataHandler) for an unknown content type
 	 */
 	@Test
-	public void getContentHandler_shouldReturnTheDefaultHandlerUnstructuredDataHandlerForAnUnknownContentType()
+	public void getContentHandler_shouldReturnNullForAnUnknownContentType()
 			throws Exception {
 		ContentHandlerService chs = getService();
 		
-		assertTrue(chs.getContentHandler("application/nothing-here") instanceof UnstructuredDataHandler);
-	}
-
-	/**
-	 * @see ContentHandlerService#getContentHandler(String)
-	 * @verifies Never return null
-	 */
-	@Test
-	public void getContentHandler_shouldNeverReturnNull() throws Exception {
-		ContentHandlerService chs = getService();
-		
-		assertNotNull(chs.getContentHandler("text/plain"));
-		
-		ContentHandler mockHandler = mock(ContentHandler.class);
-		chs.registerContentHandler("text/plain", mockHandler);
-		when(mockHandler.cloneHandler()).thenReturn(mockHandler);
-		assertNotNull(chs.getContentHandler("text/plain"));
-		
-		assertNotNull(chs.getContentHandler("application/xml"));
-		assertNotNull(chs.getContentHandler("application/nothing-here"));
+		assertNull(chs.getContentHandler("application/nothing-here"));
 	}
 
 	/**
@@ -293,27 +274,11 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	 * @verifies Return the default handler (UnstructuredDataHandler) for an unknown type and format code
 	 */
 	@Test
-	public void getContentHandler_tfCode_shouldReturnTheDefaultHandlerUnstructuredDataHandlerForAnUnknownContentType()
+	public void getContentHandler_tfCode_shouldReturnNullForAnUnknownContentType()
 			throws Exception {
 		ContentHandlerService chs = getService();
 		
-		assertTrue(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) instanceof UnstructuredDataHandler);
-	}
-
-	/**
-	 * @see ContentHandlerService#getContentHandler(String,String)
-	 * @verifies Never return null
-	 */
-	@Test
-	public void getContentHandler_tfCode_shouldNeverReturnNull() throws Exception {
-		ContentHandlerService chs = getService();
-		
-		assertNotNull(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE));
-		
-		ContentHandler mockHandler = mock(ContentHandler.class);
-		chs.registerContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE, mockHandler);
-		when(mockHandler.cloneHandler()).thenReturn(mockHandler);
-		assertNotNull(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE));
+		assertNull(chs.getContentHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE));
 	}
 
 	/**
@@ -448,7 +413,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	public void getDefaultHandler_contentType_shouldReturnTheDefaultHandlerUnstructuredDataHandler()
 			throws Exception {
 		ContentHandlerService chs = getService();
-		assertTrue(chs.getDefaultHandler("text/xml") instanceof UnstructuredDataHandler);
+		assertTrue(chs.getDefaultUnstructuredHandler("text/xml") instanceof UnstructuredDataHandler);
 	}
 
 	/**
@@ -459,6 +424,6 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	public void getDefaultHandler_tfCodes_shouldReturnTheDefaultHandlerUnstructuredDataHandler()
 			throws Exception {
 		ContentHandlerService chs = getService();
-		assertTrue(chs.getDefaultHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) instanceof UnstructuredDataHandler);
+		assertTrue(chs.getDefaultUnstructuredHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) instanceof UnstructuredDataHandler);
 	}
 }

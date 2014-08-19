@@ -4,7 +4,7 @@
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>shr-contenthandler</artifactId>
-	<version>1.1.0</version>
+	<version>1.2.0</version>
 	<packaging>pom</packaging>
 	<name>SHR Content Handler Module</name>
 	<description>Provides interfaces and services for dynamically linking content processors with particular content types.</description>

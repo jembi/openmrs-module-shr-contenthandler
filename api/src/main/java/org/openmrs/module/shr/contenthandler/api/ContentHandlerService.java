@@ -31,13 +31,12 @@ public interface ContentHandlerService extends OpenmrsService {
 	
 	/**
 	 * Returns a content handler for a specified content type.
-	 * Will return a default handler for unknown types.
+	 * Will return null for unknown types.
 	 * 
 	 * @return An appropriate content handler for a specified content type
 	 * @should Get an appropriate content handler for a specified content type
 	 * @should Return a clone of the requested handler using the handler's cloneHandler method
-	 * @should Return the default handler (UnstructuredDataHandler) for an unknown content type
-	 * @should Never return null
+	 * @should Return null for an unknown content type
 	 */
 	ContentHandler getContentHandler(String contentType);
  
@@ -76,11 +75,10 @@ public interface ContentHandlerService extends OpenmrsService {
 	 * <p>
 	 * @see #getContentHandler(String)
 	 * 
-	 * @return An appropriate content handler for a specified content type
-	 * @should Get an appropriate content handler for a specified content type
+	 * @return An appropriate content handler for a specified format code and type code
+	 * @should Get an appropriate content handler for a specified format code and type code
 	 * @should Return a clone of the requested handler using the handler's cloneHandler method
-	 * @should Return the default handler (UnstructuredDataHandler) for an unknown content type
-	 * @should Never return null
+	 * @should Return null for an unknown typeCode and formatCode
 	 */
 	ContentHandler getContentHandler(CodedValue typeCode, CodedValue formatCode);
  
@@ -112,18 +110,19 @@ public interface ContentHandlerService extends OpenmrsService {
 	
 	
 	/**
-	 * Get an instance of the default handler for a specific content type.
+	 * Get an instance of the default unstructured data handler for a specific content type.
 	 * 
-	 * @return The default handler
+	 * @return The default unstructured data handler
 	 * @should Return the default handler (UnstructuredDataHandler)
 	 */
-	ContentHandler getDefaultHandler(String contentType);
+	ContentHandler getDefaultUnstructuredHandler(String contentType);
 	
 	/**
-	 * Get an instance of the default handler for a specific type and format code.
+	 * Get an instance of the default unstructured data handler for a specific type and format code.
 	 * 
-	 * @return The default handler
+	 * @return The default unstructured data handler
 	 * @should Return the default handler (UnstructuredDataHandler)
 	 */
-	ContentHandler getDefaultHandler(CodedValue typeCode, CodedValue formatCode);
+	ContentHandler getDefaultUnstructuredHandler(CodedValue typeCode, CodedValue formatCode);
+	
 }
