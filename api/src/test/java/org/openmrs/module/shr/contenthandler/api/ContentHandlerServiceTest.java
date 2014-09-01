@@ -13,9 +13,25 @@
  */
 package org.openmrs.module.shr.contenthandler.api;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Map;
+import java.util.Set;
+
 import org.junit.Test;
+import org.openmrs.Encounter;
+import org.openmrs.EncounterRole;
+import org.openmrs.EncounterType;
+import org.openmrs.Patient;
+import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.shr.contenthandler.UnstructuredDataHandler;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
@@ -406,24 +422,79 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	}
 
 	/**
-	 * @see ContentHandlerService#getDefaultHandler(CodedValue,CodedValue)
+	 * @see ContentHandlerService#getDefaultUnstructuredHandler()
 	 * @verifies Return the default handler (UnstructuredDataHandler)
 	 */
 	@Test
 	public void getDefaultHandler_contentType_shouldReturnTheDefaultHandlerUnstructuredDataHandler()
 			throws Exception {
 		ContentHandlerService chs = getService();
-		assertTrue(chs.getDefaultUnstructuredHandler("text/xml") instanceof UnstructuredDataHandler);
+		assertTrue(chs.getDefaultUnstructuredHandler() instanceof UnstructuredDataHandler);
 	}
 
 	/**
-	 * @see ContentHandlerService#getDefaultHandler(String)
-	 * @verifies Return the default handler (UnstructuredDataHandler)
+	 * @see ContentHandlerService#getContentHandlerByClass(Class)
+	 * @verifies return a content handler for the given class
 	 */
 	@Test
-	public void getDefaultHandler_tfCodes_shouldReturnTheDefaultHandlerUnstructuredDataHandler()
+	public void getContentHandlerByClass_shouldReturnAContentHandlerForTheGivenClass()
 			throws Exception {
 		ContentHandlerService chs = getService();
-		assertTrue(chs.getDefaultUnstructuredHandler(TEST_TYPE_CODE, TEST_FORMAT_CODE) instanceof UnstructuredDataHandler);
+		chs.registerContentHandler("text/xml", new KnownContentHandler());
+		
+		ContentHandler ch = chs.getContentHandlerByClass(KnownContentHandler.class);
+		assertThat(ch, instanceOf(KnownContentHandler.class));
+	}
+
+	/**
+	 * @see ContentHandlerService#getContentHandlerByClass(Class)
+	 * @verifies return the default content handler if no content handler was found
+	 */
+	@Test
+	public void getContentHandlerByClass_shouldReturnTheDefaultContentHandlerIfNoContentHandlerWasFound()
+			throws Exception {
+		ContentHandlerService chs = getService();
+		ContentHandler defaultUnstructuredHandler = chs.getDefaultUnstructuredHandler();
+		
+		ContentHandler ch = chs.getContentHandlerByClass(UnkownContentHandler.class);
+		assertThat(ch, instanceOf(defaultUnstructuredHandler.getClass()));
+	}
+	
+	private class UnkownContentHandler implements ContentHandler {
+		@Override
+		public Encounter saveContent(Patient patient,
+				Map<EncounterRole, Set<Provider>> providersByRole,
+				EncounterType encounterType, Content content) {
+			return null;
+		}
+
+		@Override
+		public Content fetchContent(String contentId) {
+			return null;
+		}
+
+		@Override
+		public ContentHandler cloneHandler() {
+			return new UnkownContentHandler();
+		}
+	}
+	
+	private class KnownContentHandler implements ContentHandler {
+		@Override
+		public Encounter saveContent(Patient patient,
+				Map<EncounterRole, Set<Provider>> providersByRole,
+				EncounterType encounterType, Content content) {
+			return null;
+		}
+
+		@Override
+		public Content fetchContent(String contentId) {
+			return null;
+		}
+
+		@Override
+		public ContentHandler cloneHandler() {
+			return new KnownContentHandler();
+		}
 	}
 }

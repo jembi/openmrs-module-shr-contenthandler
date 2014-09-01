@@ -13,10 +13,7 @@
  */
 package org.openmrs.module.shr.contenthandler;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -53,31 +50,8 @@ public class UnstructuredDataHandler implements ContentHandler {
 	protected static final String UNSTRUCTURED_ATTACHMENT_CONCEPT_BASE_NAME = "Unstructured Attachment";
 	protected static final String UNSTRUCTURED_DATA_HANDLER_GLOBAL_PROP = "shr.contenthandler.unstructureddatahandler.key";
 	
-	protected final String contentType;
-	protected final CodedValue typeCode;
-	protected final CodedValue formatCode;
-	
-	
 	/**
-	 * Construct a new unstructured data handler that references content via content type
-	 */
-	public UnstructuredDataHandler(String contentType) {
-		this.contentType = contentType;
-		typeCode = formatCode = null;
-	}
-	
-	/**
-	 * Construct a new unstructured data handler that references content via type and format code
-	 */
-	public UnstructuredDataHandler(CodedValue typeCode, CodedValue formatCode) {
-		this.typeCode = typeCode;
-		this.formatCode = formatCode;
-		this.contentType = null;
-	}
-
-
-	/**
-	 * @see ContentHandler#saveContent(Patient, Provider, EncounterRole, EncounterType, Content)
+	 * @see ContentHandler#saveContent(String, Patient, Provider, EncounterRole, EncounterType, Content)
 	 * @should create a new encounter object using the current time
 	 * @should contain a complex obs containing the content
 	 */
@@ -115,11 +89,12 @@ public class UnstructuredDataHandler implements ContentHandler {
 	
 	private Obs createUnstructuredDataObs(Content content) {
 		Obs res = new Obs();
-		ComplexData cd = new ComplexData(buildTitle(), content);
+		ComplexData cd = new ComplexData(content.getContentId(), content);
 		
 		res.setConcept(getUnstructuredAttachmentConcept(content.getFormatCode()));
 		res.setComplexData(cd);
 		res.setObsDatetime(new Date());
+		res.setAccessionNumber(content.getContentId());
 		
 		return res;
 	}
@@ -156,8 +131,6 @@ public class UnstructuredDataHandler implements ContentHandler {
 		
 		return c;
 	}
-	
-	
 
 	/**
 	 * @see ContentHandler#fetchContent(String)
@@ -166,123 +139,38 @@ public class UnstructuredDataHandler implements ContentHandler {
 	 * @should return null if the encounter isn't found
 	 */
 	@Override
-	public Content fetchContent(String encounterUuid) {
-		Encounter enc = Context.getEncounterService().getEncounterByUuid(encounterUuid);
-		if (enc==null)
-			return null;
-		
-		List<Content> res = new LinkedList<Content>();
-		getContentFromEncounter(res, enc);
-		if (res.isEmpty())
-			return null;
-		return res.get(0);
-	}
-
-	/**
-	 * @see ContentHandler#fetchContent(int)
-	 * @should return a Content object for the encounter if found
-	 * @should return null if the encounter doesn't contain an unstructured data obs
-	 * @should return null if the encounter isn't found
-	 */
-	@Override
-	public Content fetchContent(int encounterId) {
-		Encounter enc = Context.getEncounterService().getEncounter(encounterId);
-		if (enc==null)
-			return null;
-		
-		List<Content> res = new LinkedList<Content>();
-		getContentFromEncounter(res, enc);
-		if (res.isEmpty())
-			return null;
-		return res.get(0);
-	}
-
-
-	/**
-	 * @see ContentHandler#queryEncounters(Patient, Date, Date)
-	 * @should return a list of Content objects for all matching encounters
-	 * @should only return Content objects that match the handler's content type
-	 * @should return an empty list if no encounters with unstructured data obs are found
-	 * @should handle null values for date from and to
-	 */
-	@Override
-	public List<Content> queryEncounters(Patient patient, Date from, Date to) {
-		return queryEncounters(patient, null, from, to);
-	}
-
-	/**
-	 * @see ContentHandler#queryEncounters(Patient, EncounterType, Date, Date)
-	 * @should return a list of Content objects for all matching encounters
-	 * @should only return Content objects that match the handler's content type
-	 * @should return an empty list if no encounters with unstructured data obs are found
-	 * @should handle null values for date from and to
-	 */
-	@Override
-	public List<Content> queryEncounters(Patient patient, List<EncounterType> encounterTypes, Date from, Date to) {
-		List<Encounter> encs = Context.getEncounterService().getEncounters(
-			patient, null, from, to, null, encounterTypes, null, null, null, false
-		);
-		if (encs==null || encs.isEmpty())
-			return Collections.emptyList();
-		
-		List<Content> res = new ArrayList<Content>(encs.size());
-		
-		for (Encounter enc : encs) {
-			getContentFromEncounter(res, enc);
-		}
-		
-		return res;
-	}
-	
-	private void getContentFromEncounter(List<Content> dst, Encounter enc) {
+	public Content fetchContent(String contentId) {
 		ObsService os = Context.getObsService();
+		// TODO update this to search by accession number, this can be done from OpenMRS 1.12
+		List<Obs> obsList = os.getObservations(null, null, null, null, null, null, null, null, null, null, null, false);
 		
-		for (Obs obs : enc.getAllObs()) {
-			if (obs.isComplex() && isConceptAnUnstructuredDataType(obs.getConcept())) {
+		for (Obs obs : obsList) {
+			if (obs.getAccessionNumber() != null && obs.getAccessionNumber().equals(contentId) && obs.isComplex() && isConceptAnUnstructuredDataType(obs.getConcept())) {
 				Obs complexObs = os.getComplexObs(obs.getObsId(), OpenmrsConstants.RAW_VIEW);
 				Object data = complexObs.getComplexData()!=null ? complexObs.getComplexData().getData() : null;
 				
 				if (data==null || !(data instanceof Content)) {
 					log.warn("Unprocessable content found in unstructured data obs (obsId = " + obs.getId() + ")");
 					continue;
-				}
-				
-				String contentTitle = contentType!=null ? (((Content)data).getContentType()) :
-					buildTypeFormatCodeTitle(((Content)data).getTypeCode(), ((Content)data).getFormatCode());
-					
-				if (contentTitle.equals(buildTitle())) {
-					dst.add((Content)data);
+				} else {
+					return (Content) data;
 				}
 			}
 		}
+		
+		return null;
 	}
-	
+
 	private boolean isConceptAnUnstructuredDataType(Concept c) {
 		return c.getName().getName().startsWith(UNSTRUCTURED_ATTACHMENT_CONCEPT_BASE_NAME);
 	}
 	
-	/**
-	 * Build a title that's suitable for referencing the complex obs
-	 */
-	private String buildTitle() {
-		return contentType!=null ? contentType : buildTypeFormatCodeTitle(typeCode, formatCode);
-	}
-	
-	protected static String buildTypeFormatCodeTitle(CodedValue typeCode, CodedValue formatCode) {
-		//Use the formatCode code as the title
-		return formatCode.getCode();
-	}
-
 	/**
 	 * @see ContentHandler#cloneHandler()
 	 * @should return an UnstructuredDataHandler instance with the same content type
 	 */
 	@Override
 	public UnstructuredDataHandler cloneHandler() {
-		if (contentType!=null) {
-			return new UnstructuredDataHandler(contentType);
-		} else {
-			return new UnstructuredDataHandler(typeCode, formatCode);
-		}
+		return new UnstructuredDataHandler();
 	}
 }

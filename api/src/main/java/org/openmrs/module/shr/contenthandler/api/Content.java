@@ -78,6 +78,7 @@ public final class Content implements Comparable<Content>, Serializable {
 		Z
 	}
 	
+	private final String contentId;
 	private final CodedValue typeCode;
 	private final CodedValue formatCode;
 	private final String contentType;
@@ -88,14 +89,14 @@ public final class Content implements Comparable<Content>, Serializable {
 	private final boolean payloadIsUrl;
 	private final String payload;
 	
-	
+
 	/**
 	 * Creates a new Content object with a simple text payload. Good if the payload is an XML document for example.
 	 * 
 	 * @see #Content(String, boolean, String, String, String, String, Representation, CompressionFormat, Locale)
 	 */
-	public Content(String payload, CodedValue typeCode, CodedValue formatCode, String contentType) {
-		this(payload, false, typeCode, formatCode, contentType, null, Representation.TXT, null, null);
+	public Content(String contentId, String payload, CodedValue typeCode, CodedValue formatCode, String contentType) {
+		this(contentId, payload, false, typeCode, formatCode, contentType, null, Representation.TXT, null, null);
 	}
 	
 	/**
@@ -112,7 +113,8 @@ public final class Content implements Comparable<Content>, Serializable {
 	 * @param compressionFormat (Nullable) The compression algorithm used by the content
 	 * @param language			(Nullable) The content language
 	 */
-	public Content(String payload, boolean payloadIsUrl, CodedValue typeCode, CodedValue formatCode, String contentType, String encoding, Representation representation, CompressionFormat compressionFormat, Locale language) {
+	public Content(String contentId, String payload, boolean payloadIsUrl, CodedValue typeCode, CodedValue formatCode, String contentType, String encoding, Representation representation, CompressionFormat compressionFormat, Locale language) {
+		this.contentId = contentId;
 		this.payload = payload;
 		this.typeCode = typeCode;
 		this.formatCode = formatCode;
@@ -130,6 +132,9 @@ public final class Content implements Comparable<Content>, Serializable {
 			throw new InvalidRepresentationException("Binary payload must be Base64 encoded.");
 	}
 	
+	public String getContentId() {
+		return contentId;
+	}
 	
 	public CodedValue getTypeCode() {
 		return typeCode;

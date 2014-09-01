@@ -115,14 +115,23 @@ public interface ContentHandlerService extends OpenmrsService {
 	 * @return The default unstructured data handler
 	 * @should Return the default handler (UnstructuredDataHandler)
 	 */
-	ContentHandler getDefaultUnstructuredHandler(String contentType);
+	ContentHandler getDefaultUnstructuredHandler();
 	
 	/**
-	 * Get an instance of the default unstructured data handler for a specific type and format code.
+	 * Set the default unstructured content handler
 	 * 
-	 * @return The default unstructured data handler
-	 * @should Return the default handler (UnstructuredDataHandler)
+	 * @param defaultHandler The default unstructured content handler to set
 	 */
-	ContentHandler getDefaultUnstructuredHandler(CodedValue typeCode, CodedValue formatCode);
+	void setDefaultUnstructuredHandler(ContentHandler defaultHandler);
+	
+	/**
+	 * Fetches a registered content handler that is of the given class type.
+	 * 
+	 * @param documentHandlerClass
+	 * @return
+	 * @should return a content handler for the given class
+	 * @should return the default content handler if no content handler was found
+	 */
+	ContentHandler getContentHandlerByClass(Class<? extends ContentHandler> documentHandlerClass);
 	
 }
