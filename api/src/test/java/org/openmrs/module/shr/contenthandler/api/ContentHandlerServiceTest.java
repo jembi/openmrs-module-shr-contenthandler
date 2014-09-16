@@ -239,7 +239,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	/* Type and format code */
 	
 	/**
-	 * @see ContentHandlerService#deregisterContentHandler(String, String)
+	 * @see ContentHandlerService#deregisterContentHandler(CodedValue, CodedValue)
 	 * @verifies Deregister the handler assigned to specified type and format code
 	 */
 	@Test
@@ -258,7 +258,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	}
 
 	/**
-	 * @see ContentHandlerService#deregisterContentHandler(String, String)
+	 * @see ContentHandlerService#deregisterContentHandler(CodedValue, CodedValue)
 	 * @verifies Do nothing if there is no handler assigned for a specified type and format code
 	 */
 	@Test
@@ -270,7 +270,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	}
 
 	/**
-	 * @see ContentHandlerService#getContentHandler(String, String)
+	 * @see ContentHandlerService#getContentHandler(CodedValue, CodedValue)
 	 * @verifies Get an appropriate content handler for a specified type and format code
 	 */
 	@Test
@@ -286,7 +286,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	}
 
 	/**
-	 * @see ContentHandlerService#getContentHandler(String, String)
+	 * @see ContentHandlerService#getContentHandler(CodedValue, CodedValue)
 	 * @verifies Return the default handler (UnstructuredDataHandler) for an unknown type and format code
 	 */
 	@Test
@@ -298,7 +298,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	}
 
 	/**
-	 * @see ContentHandlerService#registerContentHandler(String,String,ContentHandler)
+	 * @see ContentHandlerService#registerContentHandler(CodedValue, CodedValue, ContentHandler)
 	 * @verifies Register the specified handler for the specified type and format code
 	 */
 	@Test
@@ -315,7 +315,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	}
 
 	/**
-	 * @see ContentHandlerService#registerContentHandler(String,String,ContentHandler)
+	 * @see ContentHandlerService#registerContentHandler(CodedValue, CodedValue, ContentHandler)
 	 * @verifies Throw an AlreadyRegisteredException if a handler is already registered for a specified type and format code
 	 */
 	@Test
@@ -337,8 +337,8 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	}
 
 	/**
-	 * @see ContentHandlerService#deregisterContentHandler(String,String)
-	 * @verifies Do nothing if there is an invalid type and format code specified
+	 * @see ContentHandlerService#deregisterContentHandler(String)
+	 * @verifies Do nothing if there is an invalid content type specified
 	 */
 	@Test
 	public void deregisterContentHandler_tfCode_shouldDoNothingIfThereIsAnInvalidContentTypeSpecified()
@@ -351,7 +351,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	}
 
 	/**
-	 * @see ContentHandlerService#registerContentHandler(String,String,ContentHandler)
+	 * @see ContentHandlerService#registerContentHandler(CodedValue, CodedValue, ContentHandler)
 	 * @verifies Throw an InvalidCodedTypeException if an invalid type and format code is specified
 	 */
 	@Test
@@ -388,7 +388,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	}
 
 	/**
-	 * @see ContentHandlerService#getContentHandler(String,String)
+	 * @see ContentHandlerService#getContentHandler(CodedValue, CodedValue)
 	 * @verifies Return a clone of the requested handler using the handler's cloneHandler method
 	 */
 	@Test
@@ -405,7 +405,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	}
 
 	/**
-	 * @see ContentHandlerService#registerContentHandler(String,String,ContentHandler)
+	 * @see ContentHandlerService#registerContentHandler(CodedValue, CodedValue, ContentHandler)
 	 * @verifies Throw a NullPointerException if prototype is null
 	 */
 	@Test
@@ -448,16 +448,15 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 
 	/**
 	 * @see ContentHandlerService#getContentHandlerByClass(Class)
-	 * @verifies return the default content handler if no content handler was found
+	 * @verifies return null if no content handler was found
 	 */
 	@Test
-	public void getContentHandlerByClass_shouldReturnTheDefaultContentHandlerIfNoContentHandlerWasFound()
+	public void getContentHandlerByClass_shouldReturnNullIfNoContentHandlerWasFound()
 			throws Exception {
 		ContentHandlerService chs = getService();
-		ContentHandler defaultUnstructuredHandler = chs.getDefaultUnstructuredHandler();
-		
+
 		ContentHandler ch = chs.getContentHandlerByClass(UnkownContentHandler.class);
-		assertThat(ch, instanceOf(defaultUnstructuredHandler.getClass()));
+		assertNull(ch);
 	}
 	
 	private class UnkownContentHandler implements ContentHandler {

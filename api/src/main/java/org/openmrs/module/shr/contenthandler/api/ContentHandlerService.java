@@ -130,7 +130,7 @@ public interface ContentHandlerService extends OpenmrsService {
 	 * @param documentHandlerClass
 	 * @return
 	 * @should return a content handler for the given class
-	 * @should return the default content handler if no content handler was found
+	 * @should return the null if no content handler was found
 	 */
 	ContentHandler getContentHandlerByClass(Class<? extends ContentHandler> documentHandlerClass);
 	

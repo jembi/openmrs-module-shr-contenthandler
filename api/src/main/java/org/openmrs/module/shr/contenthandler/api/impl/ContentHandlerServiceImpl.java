@@ -188,7 +188,7 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 			}
 		}
 		
-		return this.defaultUnstructuredContentHandler.cloneHandler();
+		return null;
 	}
 
 	@Override

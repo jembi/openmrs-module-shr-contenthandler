@@ -93,7 +93,7 @@ public final class Content implements Comparable<Content>, Serializable {
 	/**
 	 * Creates a new Content object with a simple text payload. Good if the payload is an XML document for example.
 	 * 
-	 * @see #Content(String, boolean, String, String, String, String, Representation, CompressionFormat, Locale)
+	 * @see #Content(String, String, boolean, CodedValue, CodedValue, String, String, Representation, CompressionFormat, Locale)
 	 */
 	public Content(String contentId, String payload, CodedValue typeCode, CodedValue formatCode, String contentType) {
 		this(contentId, payload, false, typeCode, formatCode, contentType, null, Representation.TXT, null, null);
@@ -222,15 +222,15 @@ public final class Content implements Comparable<Content>, Serializable {
 
 	
 	/**
-	 * Two Content objects are considered equal if their payloads are equal.
+	 * Two Content objects are considered equal if their IDs are equal.
 	 */
 	@Override
 	public int compareTo(Content o) {
-		return payload.compareTo(o.payload);
+		return contentId.compareTo(o.contentId);
 	}
 
 	/**
-	 * Two Content objects are considered equal if their payloads are equal.
+	 * Two Content objects are considered equal if their IDs are equal.
 	 */
 	@Override
 	public boolean equals(Object obj) {
