@@ -18,13 +18,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,12 +51,8 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest {
 	
 	private static final CodedValue TEST_CODE_PLAIN = new CodedValue("plain", "test", "test");
-	private static final CodedValue TEST_CODE_PLAIN2 = new CodedValue("plain2", "test", "test");
-	private static final CodedValue TEST_CODE_XML = new CodedValue("xml", "test", "test");
 	
-	private static final Content TEST_CONTENT_PLAIN = new Content("This is a test string. It is awesome.", TEST_CODE_PLAIN, TEST_CODE_PLAIN, "text/plain");
-	private static final Content TEST_CONTENT_PLAIN2 = new Content("This is a test string. It is awesome.", TEST_CODE_PLAIN2, TEST_CODE_PLAIN2, "text/plain");
-	private static final Content TEST_CONTENT_XML = new Content("<test>This is a test string. It is awesome.</test>", TEST_CODE_XML, TEST_CODE_XML, "text/xml");
+	private static final Content TEST_CONTENT_PLAIN = new Content("testId", "This is a test string. It is awesome.", TEST_CODE_PLAIN, TEST_CODE_PLAIN, "text/plain");
 
 
 	@SuppressWarnings("deprecation")
@@ -71,38 +63,11 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	}
 		
 	/**
-	 * @see UnstructuredDataHandler#cloneHandler()
-	 * @verifies return an UnstructuredDataHandler instance with the same content type
-	 */
-	@Test
-	public void cloneHandler_shouldReturnAnUnstructuredDataHandlerInstanceWithTheSameContentType()
-			throws Exception {
-		UnstructuredDataHandler handler = new UnstructuredDataHandler(TEST_CONTENT_PLAIN.getContentType());
-		UnstructuredDataHandler clone = handler.cloneHandler();
-		assertNotNull(clone);
-		assertEquals(handler.contentType, clone.contentType);
-	}
-		
-	/**
-	 * @see UnstructuredDataHandler#cloneHandler()
-	 * @verifies return an UnstructuredDataHandler instance with the same type and format code
-	 */
-	@Test
-	public void cloneHandler_shouldReturnAnUnstructuredDataHandlerInstanceWithTheSameTypeAndFormatCode()
-			throws Exception {
-		UnstructuredDataHandler handler2 = new UnstructuredDataHandler(TEST_CONTENT_PLAIN.getTypeCode(), TEST_CONTENT_PLAIN.getFormatCode());
-		UnstructuredDataHandler clone2 = handler2.cloneHandler();
-		assertNotNull(clone2);
-		assertEquals(handler2.typeCode, clone2.typeCode);
-		assertEquals(handler2.formatCode, clone2.formatCode);
-	}
-
-	/**
 	 * @see UnstructuredDataHandler#saveContent(Patient,Provider,EncounterRole,EncounterType,Content)
 	 * @verifies contain a complex obs containing the content
 	 */
 	@Test
-	public void saveContentByContentType_shouldContainAComplexObsContainingTheContent()
+	public void saveContent_shouldContainAComplexObsContainingTheContent()
 			throws Exception {
 		Encounter res = saveTestEncounter(TEST_CONTENT_PLAIN);
 		Set<Obs> obs = res.getAllObs();
@@ -112,26 +77,7 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 		
 		Obs theObs = obs.iterator().next();
 		assertTrue(theObs.isComplex());
-		assertEquals(TEST_CONTENT_PLAIN.getContentType(), theObs.getComplexData().getTitle());
-		assertEquals(TEST_CONTENT_PLAIN, theObs.getComplexData().getData());
-	}
-	
-	/**
-	 * @see UnstructuredDataHandler#saveContent(Patient,Provider,EncounterRole,EncounterType,Content)
-	 * @verifies contain a complex obs containing the content
-	 */
-	@Test
-	public void saveContentByTypeAndFormatCode_shouldContainAComplexObsContainingTheContent()
-			throws Exception {
-		Encounter res = saveTestEncounter(TEST_CONTENT_PLAIN, true);
-		Set<Obs> obs = res.getAllObs();
-		
-		assertNotNull(obs);
-		assertEquals(obs.size(), 1);
-		
-		Obs theObs = obs.iterator().next();
-		assertTrue(theObs.isComplex());
-		String expectedTitle = UnstructuredDataHandler.buildTypeFormatCodeTitle(TEST_CONTENT_PLAIN.getTypeCode(), TEST_CONTENT_PLAIN.getFormatCode()); 
+		String expectedTitle = "testId";
 		assertEquals(expectedTitle, theObs.getComplexData().getTitle());
 		assertEquals(TEST_CONTENT_PLAIN, theObs.getComplexData().getData());
 	}
@@ -156,269 +102,35 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	}
 
 	/**
-	 * @see UnstructuredDataHandler#fetchContent(int)
-	 * @verifies return a Content object for the encounter if found
-	 */
-	@Test
-	public void fetchContent_int_shouldReturnAContentObjectForTheEncounterIfFound()
-			throws Exception {
-		UnstructuredDataHandler handler = new UnstructuredDataHandler(TEST_CONTENT_PLAIN.getContentType());
-		Encounter enc = saveTestEncounter(TEST_CONTENT_PLAIN);
-		
-		Content res = handler.fetchContent(enc.getId());
-		assertNotNull(res);
-		assertEquals(TEST_CONTENT_PLAIN, res);
-	}
-
-	/**
-	 * @see UnstructuredDataHandler#fetchContent(int)
-	 * @verifies return null if the encounter doesn't contain an unstructured data obs
-	 */
-	@Test
-	public void fetchContent_int_shouldReturnNullIfTheEncounterDoesntContainAnUnstructuredDataObs()
-			throws Exception {
-		UnstructuredDataHandler handler = new UnstructuredDataHandler("text/plain");
-		
-		Encounter testData = Context.getEncounterService().getEncounter(3);
-		assertNotNull("Test data should be setup correctly", testData);
-		Content content = handler.fetchContent(3);
-		assertNull(content);
-	}
-
-	/**
-	 * @see UnstructuredDataHandler#fetchContent(int)
-	 * @verifies return null if the encounter isn't found
-	 */
-	@Test
-	public void fetchContent_int_shouldReturnNullIfTheEncounterIsntFound()
-			throws Exception {
-		UnstructuredDataHandler handler = new UnstructuredDataHandler("text/plain");
-		
-		Encounter testData = Context.getEncounterService().getEncounter(123456);
-		assertNull("Test encounter should not exist", testData);
-		Content content = handler.fetchContent(123456);
-		assertNull(content);
-	}
-
-	/**
-	 * @see UnstructuredDataHandler#fetchContent(String)
+	 * @see UnstructuredDataHandler#fetchContent(string)
 	 * @verifies return a Content object for the encounter if found
 	 */
 	@Test
 	public void fetchContent_string_shouldReturnAContentObjectForTheEncounterIfFound()
 			throws Exception {
-		UnstructuredDataHandler handler = new UnstructuredDataHandler(TEST_CONTENT_PLAIN.getContentType());
-		Encounter enc = saveTestEncounter(TEST_CONTENT_PLAIN);
+		UnstructuredDataHandler handler = new UnstructuredDataHandler();
+		saveTestEncounter(TEST_CONTENT_PLAIN);
 		
-		Content res = handler.fetchContent(enc.getUuid());
+		Content res = handler.fetchContent(TEST_CONTENT_PLAIN.getContentId());
 		assertNotNull(res);
 		assertEquals(TEST_CONTENT_PLAIN, res);
 	}
 
 	/**
-	 * @see UnstructuredDataHandler#fetchContent(String)
-	 * @verifies return null if the encounter doesn't contain an unstructured data obs
-	 */
-	@Test
-	public void fetchContent_string_shouldReturnNullIfTheEncounterDoesntContainAnUnstructuredDataObs()
-			throws Exception {
-		UnstructuredDataHandler handler = new UnstructuredDataHandler("text/plain");
-		
-		Encounter testData = Context.getEncounterService().getEncounterByUuid("6519d653-393b-4118-9c83-a3715b82d4ac");
-		assertNotNull("Test data should be setup correctly", testData);
-		Content content = handler.fetchContent("6519d653-393b-4118-9c83-a3715b82d4ac");
-		assertNull(content);
-	}
-
-	/**
-	 * @see UnstructuredDataHandler#fetchContent(String)
+	 * @see UnstructuredDataHandler#fetchContent(string)
 	 * @verifies return null if the encounter isn't found
 	 */
 	@Test
 	public void fetchContent_string_shouldReturnNullIfTheEncounterIsntFound()
 			throws Exception {
-		UnstructuredDataHandler handler = new UnstructuredDataHandler("text/plain");
+		UnstructuredDataHandler handler = new UnstructuredDataHandler();
 		
-		Encounter testData = Context.getEncounterService().getEncounterByUuid("12345678-aaaa-bbbb-cccc-dddddddddddd");
+		Encounter testData = Context.getEncounterService().getEncounter(123456);
 		assertNull("Test encounter should not exist", testData);
-		Content content = handler.fetchContent("12345678-aaaa-bbbb-cccc-dddddddddddd");
+		Content content = handler.fetchContent("unknownId");
 		assertNull(content);
 	}
 
-	/**
-	 * @see UnstructuredDataHandler#queryEncounters(Patient,Date,Date)
-	 * @verifies return a list of Content objects for all matching encounters
-	 */
-	@Test
-	public void queryEncounters_shouldReturnAListOfContentObjectsForAllMatchingEncounters()
-			throws Exception {
-		for (int i=0; i<3; i++)
-			saveTestEncounter(TEST_CONTENT_PLAIN);
-		saveOldTestEncounter(TEST_CONTENT_PLAIN2);
-		
-		//Old encounter should not be in the result set
-		getAndCheckContent(3, TEST_CONTENT_PLAIN.getContentType(), TEST_CONTENT_PLAIN.getFormatCode());
-	}
-
-	/**
-	 * @see UnstructuredDataHandler#queryEncounters(Patient,Date,Date)
-	 * @verifies only return Content objects that match the handler's content type
-	 */
-	@Test
-	public void queryEncounters_shouldOnlyReturnContentObjectsThatMatchTheHandlersContentType()
-			throws Exception {
-		for (int i=0; i<3; i++)
-			saveTestEncounter(TEST_CONTENT_PLAIN);
-		saveTestEncounter(TEST_CONTENT_XML);
-		
-		//XML content should not be in the result set
-		getAndCheckContent(3, TEST_CONTENT_PLAIN.getContentType(), TEST_CONTENT_PLAIN.getFormatCode());
-		//Plain text content should not be in the result set
-		getAndCheckContent(1, TEST_CONTENT_XML.getContentType(), TEST_CONTENT_XML.getFormatCode());
-	}
-
-	/**
-	 * @see UnstructuredDataHandler#queryEncounters(Patient,Date,Date)
-	 * @verifies return an empty list if no encounters with unstructured data obs are found
-	 */
-	@Test
-	public void queryEncounters_shouldReturnAnEmptyListIfNoEncountersWithUnstructuredDataObsAreFound()
-			throws Exception {
-		UnstructuredDataHandler handler = new UnstructuredDataHandler("text/plain");
-		
-		Patient testPatient = Context.getPatientService().getPatient(7);
-		Calendar from = new GregorianCalendar(2008, Calendar.AUGUST, 1);
-		Calendar to = new GregorianCalendar(2008, Calendar.AUGUST, 19);
-		
-		List<Encounter> encs = Context.getEncounterService().getEncounters(
-			testPatient, null, from.getTime(), to.getTime(), null, null, null, null, null, false
-		);
-		assertEquals("Test data should be setup correctly", 3, encs.size());
-		
-		List<Content> res = handler.queryEncounters(testPatient, from.getTime(), to.getTime());
-		assertNotNull(res);
-		assertTrue(res.isEmpty());
-	}
-
-	/**
-	 * @see UnstructuredDataHandler#queryEncounters(Patient,List,Date,Date)
-	 * @verifies return a list of Content objects for all matching encounters
-	 */
-	@Test
-	public void queryEncounters_list_shouldReturnAListOfContentObjectsForAllMatchingEncounters()
-			throws Exception {
-		int encType1 = 1;
-		int encType2 = 2;
-		
-		for (int i=0; i<3; i++)
-			saveTestEncounter(TEST_CONTENT_PLAIN, encType1);
-		saveOldTestEncounter(TEST_CONTENT_PLAIN2, encType1);
-		saveTestEncounter(TEST_CONTENT_PLAIN2, encType2);
-		
-		List<EncounterType> encTypes1 = Collections.singletonList(Context.getEncounterService().getEncounterType(encType1));
-		List<EncounterType> encTypes2 = Collections.singletonList(Context.getEncounterService().getEncounterType(encType2));
-		
-		//Old encounter and encType2 data should not be in the result set
-		getAndCheckContent(encTypes1, 3, TEST_CONTENT_PLAIN.getContentType(), TEST_CONTENT_PLAIN.getFormatCode());
-		//Only one encType2 data item should be in the result set
-		getAndCheckContent(encTypes2, 1, TEST_CONTENT_PLAIN2.getContentType(), TEST_CONTENT_PLAIN2.getFormatCode());
-	}
-
-	/**
-	 * @see UnstructuredDataHandler#queryEncounters(Patient,List,Date,Date)
-	 * @verifies only return Content objects that match the handler's content type
-	 */
-	@Test
-	public void queryEncounters_list_shouldOnlyReturnContentObjectsThatMatchTheHandlersContentType()
-			throws Exception {
-		int encType1 = 1;
-		int encType2 = 2;
-		
-		for (int i=0; i<3; i++)
-			saveTestEncounter(TEST_CONTENT_PLAIN, encType1);
-		saveTestEncounter(TEST_CONTENT_XML, encType1);
-		saveTestEncounter(TEST_CONTENT_PLAIN2, encType2);
-		
-		List<EncounterType> encTypes1 = Collections.singletonList(Context.getEncounterService().getEncounterType(encType1));
-		List<EncounterType> encTypes2 = Collections.singletonList(Context.getEncounterService().getEncounterType(encType2));
-		
-		//XML and encType2 data should not be in the result set
-		getAndCheckContent(encTypes1, 3, TEST_CONTENT_PLAIN.getContentType(), TEST_CONTENT_PLAIN.getFormatCode());
-		//only XML data should be in the result set
-		getAndCheckContent(encTypes1, 1, TEST_CONTENT_XML.getContentType(), TEST_CONTENT_XML.getFormatCode());
-		//only encType2 data should be in the result set
-		getAndCheckContent(encTypes2, 1, TEST_CONTENT_PLAIN2.getContentType(), TEST_CONTENT_PLAIN2.getFormatCode());
-	}
-
-	/**
-	 * @see UnstructuredDataHandler#queryEncounters(Patient,List,Date,Date)
-	 * @verifies return an empty list if no encounters with unstructured data obs are found
-	 */
-	@Test
-	public void queryEncounters_list_shouldReturnAnEmptyListIfNoEncountersWithUnstructuredDataObsAreFound()
-			throws Exception {
-		UnstructuredDataHandler handler = new UnstructuredDataHandler("text/plain");
-		List<EncounterType> types = Collections.singletonList(Context.getEncounterService().getEncounterType(1));
-		
-		Patient testPatient = Context.getPatientService().getPatient(7);
-		Calendar from = new GregorianCalendar(2008, Calendar.AUGUST, 1);
-		Calendar to = new GregorianCalendar(2008, Calendar.AUGUST, 19);
-		
-		List<Encounter> encs = Context.getEncounterService().getEncounters(
-			testPatient, null, from.getTime(), to.getTime(), null, types, null, null, null, false
-		);
-		assertEquals("Test data should be setup correctly", 2, encs.size());
-		
-		List<Content> res = handler.queryEncounters(testPatient, types, from.getTime(), to.getTime());
-		assertNotNull(res);
-		assertTrue(res.isEmpty());
-	}
-
-	/**
-	 * @see UnstructuredDataHandler#queryEncounters(Patient,Date,Date)
-	 * @verifies handle null values for date from and to
-	 */
-	@Test
-	public void queryEncounters_shouldHandleNullValuesForDateFromAndTo()
-			throws Exception {
-		for (int i=0; i<3; i++)
-			saveTestEncounter(TEST_CONTENT_PLAIN);
-		saveOldTestEncounter(TEST_CONTENT_PLAIN);
-		
-		//Old encounter should be in the result set
-		getAndCheckContent(null, 1, 4, TEST_CONTENT_PLAIN.getContentType(), TEST_CONTENT_PLAIN.getFormatCode());
-		//Old encounter should not be in the result set
-		getAndCheckContent(-1, null, 3, TEST_CONTENT_PLAIN.getContentType(), TEST_CONTENT_PLAIN.getFormatCode());
-		//Old encounter should be in the result set
-		getAndCheckContent(null, null, 4, TEST_CONTENT_PLAIN.getContentType(), TEST_CONTENT_PLAIN.getFormatCode());
-	}
-
-	/**
-	 * @see UnstructuredDataHandler#queryEncounters(Patient,List,Date,Date)
-	 * @verifies handle null values for date from and to
-	 */
-	@Test
-	public void queryEncounters_list_shouldHandleNullValuesForDateFromAndTo()
-			throws Exception {
-		int encType1 = 1;
-		int encType2 = 2;
-		
-		for (int i=0; i<3; i++)
-			saveTestEncounter(TEST_CONTENT_PLAIN, encType1);
-		saveOldTestEncounter(TEST_CONTENT_PLAIN, encType1);
-		saveTestEncounter(TEST_CONTENT_PLAIN2, encType2);
-		
-		List<EncounterType> encTypes1 = Collections.singletonList(Context.getEncounterService().getEncounterType(encType1));
-		
-		//Old encounter should be in the result set
-		getAndCheckContent(null, 1, encTypes1, 4, TEST_CONTENT_PLAIN.getContentType(), TEST_CONTENT_PLAIN.getFormatCode());
-		//Old encounter should not be in the result set
-		getAndCheckContent(-1, null, encTypes1, 3, TEST_CONTENT_PLAIN.getContentType(), TEST_CONTENT_PLAIN.getFormatCode());
-		//Old encounter should be in the result set
-		getAndCheckContent(null, null, encTypes1, 4, TEST_CONTENT_PLAIN.getContentType(), TEST_CONTENT_PLAIN.getFormatCode());
-	}
-	
-	
 	/* Utils */
 	
 	private Encounter saveTestEncounter(Content content) {
@@ -426,20 +138,7 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	}
 	
 	private Encounter saveTestEncounter(Content content, int typeId) {
-		return saveTestEncounter(content, typeId, false);
-	}
-	
-	private Encounter saveTestEncounter(Content content, boolean useTypeAndFormatCode) {
-		return saveTestEncounter(content, 1, useTypeAndFormatCode);
-	}
-	
-	private Encounter saveTestEncounter(Content content, int typeId, boolean useTypeAndFormatCode) {
-		UnstructuredDataHandler handler = null;
-		if (useTypeAndFormatCode) {
-			handler = new UnstructuredDataHandler(content.getTypeCode(), content.getFormatCode());
-		} else {
-			handler = new UnstructuredDataHandler(content.getContentType());
-		}
+		UnstructuredDataHandler handler = new UnstructuredDataHandler();
 		
 		Patient patient = Context.getPatientService().getPatient(2);
 		Provider provider = Context.getProviderService().getProvider(1);
@@ -462,77 +161,6 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 		
 		return res;
 	}
-	
-	private Encounter saveOldTestEncounter(Content content) {
-		Encounter oldEnc = saveTestEncounter(content);
-		shiftEncounterDate(oldEnc, -2);
-		return oldEnc;
-	}
-	
-	private Encounter saveOldTestEncounter(Content content, int typeId) {
-		Encounter oldEnc = saveTestEncounter(content, typeId);
-		shiftEncounterDate(oldEnc, -2);
-		return oldEnc;
-	}
-	
-	private void shiftEncounterDate(Encounter enc, int days) {
-		Calendar oldDate = new GregorianCalendar();
-		oldDate.add(Calendar.DAY_OF_MONTH, days);
-		
-		enc.setEncounterDatetime(oldDate.getTime());
-		Context.getEncounterService().saveEncounter(enc);
-	}
-	
-	
-	private void getAndCheckContent(List<EncounterType> types, int expectedNumEncounters, String handlerContentType, CodedValue expectedFormatCode) {
-		getAndCheckContent(-1, 1, types, expectedNumEncounters, handlerContentType, expectedFormatCode);
-	}
-		
-	private void getAndCheckContent(Integer fromDays, Integer toDays, List<EncounterType> types, int expectedNumEncounters, String handlerContentType, CodedValue expectedFormatCode) {
-		Date from = shiftCurrentDate(fromDays);
-		Date to = shiftCurrentDate(toDays);
-		
-		UnstructuredDataHandler handler = new UnstructuredDataHandler(handlerContentType);
-		Patient patient = Context.getPatientService().getPatient(2);
-		List<Content> res = handler.queryEncounters(patient, types, from, to);
-		
-		assertEquals(expectedNumEncounters, res.size());
-		for (Content c : res) {
-			assertEquals(expectedFormatCode, c.getFormatCode());
-			assertEquals(handlerContentType, c.getContentType());
-		}
-	}
-	
-	private void getAndCheckContent(int expectedNumEncounters, String handlerContentType, CodedValue expectedFormatCode) {
-		getAndCheckContent(-1, 1, expectedNumEncounters, handlerContentType, expectedFormatCode);
-	}
-	
-	private void getAndCheckContent(Integer fromDays, Integer toDays, int expectedNumEncounters, String handlerContentType, CodedValue expectedFormatCode) {
-		Date from = shiftCurrentDate(fromDays);
-		Date to = shiftCurrentDate(toDays);
-		
-		UnstructuredDataHandler handler = new UnstructuredDataHandler(handlerContentType);
-		Patient patient = Context.getPatientService().getPatient(2);
-		
-		List<Content> res = handler.queryEncounters(patient, from, to);
-		
-		assertEquals(expectedNumEncounters, res.size());
-		for (Content c : res) {
-			assertEquals(expectedFormatCode, c.getFormatCode());
-			assertEquals(handlerContentType, c.getContentType());
-		}
-	}
-	
-	
-	private static Date shiftCurrentDate(Integer days) {
-		if (days==null)
-			return null;
-		
-		Calendar cal = new GregorianCalendar();
-		cal.add(Calendar.DAY_OF_MONTH, days);
-		return cal.getTime();
-	}
-	
 	
 	/**
 	 * An in-memory obs handler for testing.

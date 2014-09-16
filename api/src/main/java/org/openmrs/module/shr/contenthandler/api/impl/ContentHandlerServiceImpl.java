@@ -37,6 +37,8 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 	protected final Map<String, ContentHandler> contentTypeHandlers = new HashMap<String, ContentHandler>();
 	protected final Map<TypeFormatCode, ContentHandler> typeFormatCodeHandlers = new HashMap<TypeFormatCode, ContentHandler>();
 	
+	protected ContentHandler defaultUnstructuredContentHandler = new UnstructuredDataHandler();
+	
 	@Override
 	public ContentHandler getContentHandler(String contentType) {
 		if (contentType==null || contentType.isEmpty() || !contentTypeHandlers.containsKey(contentType)) {
@@ -166,12 +168,31 @@ public class ContentHandlerServiceImpl extends BaseOpenmrsService implements Con
 
 	
 	@Override
-	public ContentHandler getDefaultUnstructuredHandler(String contentType) {
-		return new UnstructuredDataHandler(contentType);
+	public ContentHandler getDefaultUnstructuredHandler() {
+		return this.defaultUnstructuredContentHandler.cloneHandler();
 	}
 
 	@Override
-	public ContentHandler getDefaultUnstructuredHandler(CodedValue typeCode, CodedValue formatCode) {
-		return new UnstructuredDataHandler(typeCode, formatCode);
+	public ContentHandler getContentHandlerByClass(
+			Class<? extends ContentHandler> documentHandlerClass) {
+		
+		for(ContentHandler ch : typeFormatCodeHandlers.values()) {
+			if (ch.getClass().equals(documentHandlerClass)) {
+				return ch.cloneHandler();
+			}
+		}
+		
+		for(ContentHandler ch : contentTypeHandlers.values()) {
+			if (ch.getClass().equals(documentHandlerClass)) {
+				return ch.cloneHandler();
+			}
+		}
+		
+		return null;
+	}
+
+	@Override
+	public void setDefaultUnstructuredHandler(ContentHandler defaultHandler) {
+		this.defaultUnstructuredContentHandler = defaultHandler;
 	}
 }

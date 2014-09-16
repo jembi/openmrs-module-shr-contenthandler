@@ -13,8 +13,6 @@
  */
 package org.openmrs.module.shr.contenthandler.api;
 
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -52,39 +50,10 @@ public interface ContentHandler {
 	/**
 	 * Retrieve the content associated with the specified encounter uuid.
 	 * 
-	 * @param encounterUuid The encounter identifier
+	 * @param contentId The unique content identifier that was used to save the content
 	 * @return The content in the content handler's format
 	 */
-	Content fetchContent(String encounterUuid);
-
-	/**
-	 * Retrieve the content associated with the specified encounter id.
-	 * 
-	 * @param encounterId The encounter identifier
-	 * @return The content in the content handler's format
-	 */
-	Content fetchContent(int encounterId);
-
-	/**
-	 * Retrieve a list of formatted encounters for a specified patient.
-	 * 
-	 * @param patient The patient associated with the content
-	 * @param from (nullable) The earliest encounter time to search for (inclusive)
-	 * @param to (nullable) The latest encounter time to search for (exclusive)
-	 * @return A list of encounters in the content handler's format
-	 */
-	List<Content> queryEncounters(Patient patient, Date from, Date to);
-	
-	/**
-	 * Retrieve a list of formatted encounters for a specified patient.
-	 * 
-	 * @param patient The patient associated with the content
-	 * @param encounterTypes A list of encounter types to search for
-	 * @param from (nullable) The earliest encounter time to search for (inclusive)
-	 * @param to (nullable) The latest encounter time to search for (exclusive)
-	 * @return A list of encounters in the content handler's format
-	 */
-	List<Content> queryEncounters(Patient patient, List<EncounterType> encounterTypes, Date from, Date to);
+	Content fetchContent(String contentId);
 
 	/**
 	 * Create a clone of this handler.
