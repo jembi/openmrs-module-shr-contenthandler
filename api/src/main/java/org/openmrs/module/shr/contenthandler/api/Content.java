@@ -87,7 +87,7 @@ public final class Content implements Comparable<Content>, Serializable {
 	private final CompressionFormat compressionFormat;
 	private final Locale language;
 	private final boolean payloadIsUrl;
-	private final String payload;
+	private final byte[] payload;
 	
 
 	/**
@@ -95,7 +95,7 @@ public final class Content implements Comparable<Content>, Serializable {
 	 * 
 	 * @see #Content(String, String, boolean, CodedValue, CodedValue, String, String, Representation, CompressionFormat, Locale)
 	 */
-	public Content(String contentId, String payload, CodedValue typeCode, CodedValue formatCode, String contentType) {
+	public Content(String contentId, byte[] payload, CodedValue typeCode, CodedValue formatCode, String contentType) {
 		this(contentId, payload, false, typeCode, formatCode, contentType, null, Representation.TXT, null, null);
 	}
 	
@@ -113,7 +113,7 @@ public final class Content implements Comparable<Content>, Serializable {
 	 * @param compressionFormat (Nullable) The compression algorithm used by the content
 	 * @param language			(Nullable) The content language
 	 */
-	public Content(String contentId, String payload, boolean payloadIsUrl, CodedValue typeCode, CodedValue formatCode, String contentType, String encoding, Representation representation, CompressionFormat compressionFormat, Locale language) {
+	public Content(String contentId, byte[] payload, boolean payloadIsUrl, CodedValue typeCode, CodedValue formatCode, String contentType, String encoding, Representation representation, CompressionFormat compressionFormat, Locale language) {
 		this.contentId = contentId;
 		this.payload = payload;
 		this.typeCode = typeCode;
@@ -182,44 +182,9 @@ public final class Content implements Comparable<Content>, Serializable {
 	}
 	
 	
-	public String getPayload() {
+	public byte[] getPayload() {
 		return payload;
 	}
-	
-	/**
-	 * Returns the raw data represented by this Content object.
-	 * 
-	 * If the data is Base64 encoded it will be decoded, if it is compressed it will be decompressed
-	 * and if the payload references a URL, the data will be fetched from the URL.
-	 * 
-	 * @should return the payload string as a byte array if it's not encoded or compressed
-	 * @should retrieve the data from a url if the payload is a url
-	 * @should decode the data if it is base64 encoded
-	 * @should decompress the data if it is compressed
-	 */
-	public byte[] getRawData() throws IOException {
-		byte[] data = null;
-		
-		if (payloadIsUrl)
-			data = DataUtil.fetchPayloadFromURL(payload);
-		else
-			data = payload.getBytes();
-		
-		if (representation.equals(Representation.B64))
-			data = DataUtil.decodeBase64(data);
-		
-		if (isCompressed()) {
-			switch (compressionFormat) {
-				case DF: data = DataUtil.uncompressDeflate(data); break;
-				case GZ: data = DataUtil.uncompressGZip(data); break;
-				case ZL: data = DataUtil.uncompressZLib(data); break;
-				case Z: throw new UnsupportedOperationException("Decompression for Compress (Z) algorithm not supported");
-			}
-		}
-		
-		return data;
-	}
-
 	
 	/**
 	 * Two Content objects are considered equal if their IDs are equal.

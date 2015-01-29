@@ -52,7 +52,7 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	
 	private static final CodedValue TEST_CODE_PLAIN = new CodedValue("plain", "test", "test");
 	
-	private static final Content TEST_CONTENT_PLAIN = new Content("testId", "This is a test string. It is awesome.", TEST_CODE_PLAIN, TEST_CODE_PLAIN, "text/plain");
+	private static final Content TEST_CONTENT_PLAIN = new Content("testId", "This is a test string. It is awesome.".getBytes(), TEST_CODE_PLAIN, TEST_CODE_PLAIN, "text/plain");
 
 
 	@SuppressWarnings("deprecation")
