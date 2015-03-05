@@ -60,6 +60,7 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	public void before() {
 		//Use our in-memory complex obs handler
 		Context.getAdministrationService().setGlobalProperty(UnstructuredDataHandler.UNSTRUCTURED_DATA_HANDLER_GLOBAL_PROP, "InMemoryComplexObsHandler");
+        Context.getAdministrationService().setGlobalProperty("shr.contenthandler.cacheConceptsByName", "false");
 	}
 		
 	/**
