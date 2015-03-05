@@ -31,7 +31,7 @@
         <property>shr.contenthandler.cacheConceptsByName</property>
         <defaultValue>false</defaultValue>
         <description>
-            Enables unstructured attachment concepts to be cache by name. This greatly improves performance. You MUST restart the module for this to take effect. Note: changes to concpet names will only be picked up on server restart.
+            Enables unstructured attachment concepts to be cached by name. This greatly improves performance. You MUST restart the module for this to take effect. Note: changes to concept names will only be picked up on server restart.
         </description>
     </globalProperty>
 	<!-- / Global props -->
