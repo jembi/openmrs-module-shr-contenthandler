@@ -4,3 +4,5 @@
 api/.settings/
 omod/.settings/
 target/
+.idea/
+*.iml

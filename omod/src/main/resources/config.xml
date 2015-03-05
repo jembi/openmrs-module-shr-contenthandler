@@ -27,6 +27,13 @@
 			The complex obs handler to use for unstructured data.
 		</description>
 	</globalProperty>
+    <globalProperty>
+        <property>shr.contenthandler.cacheConceptsByName</property>
+        <defaultValue>false</defaultValue>
+        <description>
+            Enables unstructured attachment concepts to be cache by name. This greatly improves performance. You MUST restart the module for this to take effect. Note: changes to concpet names will only be picked up on server restart.
+        </description>
+    </globalProperty>
 	<!-- / Global props -->
 
 	<!-- Internationalization -->
