@@ -13,11 +13,7 @@
  */
 package org.openmrs.module.shr.contenthandler;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -99,14 +95,42 @@ public class UnstructuredDataHandler implements ContentHandler {
 		return res;
 	}
 
+    private static final Map<String, Integer> conceptCache = Collections.synchronizedMap(new HashMap<String, Integer>());
+    private static final String GP_CACHE_CONCEPTS_BY_NAME = "shr.contenthandler.cacheConceptsByName";
+    private static Boolean cacheConceptsByName = null;
+
 	private Concept getUnstructuredAttachmentConcept(CodedValue formatCode) {
-		ConceptService cs = Context.getConceptService();
-		String conceptName = getUnstructuredAttachmentConceptName(formatCode);
+        synchronized (this) {
+            if (cacheConceptsByName == null) {
+                if (Context.getAdministrationService().getGlobalProperty(GP_CACHE_CONCEPTS_BY_NAME).equalsIgnoreCase("true")) {
+                    cacheConceptsByName = true;
+                } else {
+                    cacheConceptsByName = false;
+                }
+            }
+        }
+
+        ConceptService cs = Context.getConceptService();
+        String conceptName = getUnstructuredAttachmentConceptName(formatCode);
+
+        if (cacheConceptsByName) {
+            Integer conceptId = conceptCache.get(conceptName);
+
+            if (conceptId != null) {
+                return cs.getConcept(conceptId);
+            }
+        }
+
 		Concept res = cs.getConceptByName(conceptName);
-		if (res==null) {
+		if (res == null) {
 			res = buildUnstructuredAttachmentConcept(conceptName);
-			cs.saveConcept(res);
+			res = cs.saveConcept(res);
 		}
+
+        if (cacheConceptsByName) {
+            conceptCache.put(conceptName, res.getConceptId());
+        }
+
 		return res;
 	}
 	
