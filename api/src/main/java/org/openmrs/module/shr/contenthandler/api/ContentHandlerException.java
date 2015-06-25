@@ -13,10 +13,55 @@
  */
 package org.openmrs.module.shr.contenthandler.api;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * An exception for content handlers to use in order to indicate that an error has occurred.
+ * <br>
+ * Allows for the capture of discrete detail items, for example if multiple validation errors occur when processing content.
  */
 public class ContentHandlerException extends Exception {
+    public enum DetailType { INFO, WARNING, ERROR }
+
+    public static class Detail {
+        private DetailType detailType;
+        private String detail;
+
+        public Detail(DetailType detailType, String detail) {
+            this.detailType = detailType;
+            this.detail = detail;
+        }
+
+        public DetailType getDetailType() {
+            return detailType;
+        }
+
+        public void setDetailType(DetailType detailType) {
+            this.detailType = detailType;
+        }
+
+        public String getDetail() {
+            return detail;
+        }
+
+        public void setDetail(String detail) {
+            this.detail = detail;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("[%s] %s", detailType, detail);
+        }
+    }
+
+    private List<Detail> details = new ArrayList<Detail>();
+
+
+    public ContentHandlerException() {
+        super();
+    }
+
     public ContentHandlerException(String message) {
         super(message);
     }
@@ -27,5 +72,40 @@ public class ContentHandlerException extends Exception {
 
     public ContentHandlerException(Throwable cause) {
         super(cause);
+    }
+
+    public ContentHandlerException(List<Detail> details) {
+        this.details = details;
+    }
+
+
+    public List<Detail> getDetails() {
+        return details;
+    }
+
+    public void setDetails(List<Detail> details) {
+        this.details = details;
+    }
+
+    public void addDetail(Detail detail) {
+        details.add(detail);
+    }
+
+    public boolean hasDetails() {
+        return details !=null && !details.isEmpty();
+    }
+
+
+    @Override
+    public String toString() {
+        if (!hasDetails()) {
+            return super.toString();
+        }
+
+        StringBuilder sb = new StringBuilder("[ContentHandlerException] Details of this exception are:\n");
+        for (Detail detail : details) {
+            sb.append(detail + "\n");
+        }
+        return sb.toString();
     }
 }
