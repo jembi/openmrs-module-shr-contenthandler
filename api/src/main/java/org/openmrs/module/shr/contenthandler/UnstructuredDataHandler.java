@@ -170,7 +170,7 @@ public class UnstructuredDataHandler implements ContentHandler {
 		
 		for (Obs obs : obsList) {
 			if (obs.getAccessionNumber() != null && obs.getAccessionNumber().equals(contentId) && obs.isComplex() && isConceptAnUnstructuredDataType(obs.getConcept())) {
-				Obs complexObs = os.getComplexObs(obs.getObsId(), OpenmrsConstants.RAW_VIEW);
+				Obs complexObs = os.getComplexObs(obs.getObsId(), OpenmrsConstants.TEXT_VIEW);
 				Object data = complexObs.getComplexData()!=null ? complexObs.getComplexData().getData() : null;
 				
 				if (data==null || !(data instanceof Content)) {

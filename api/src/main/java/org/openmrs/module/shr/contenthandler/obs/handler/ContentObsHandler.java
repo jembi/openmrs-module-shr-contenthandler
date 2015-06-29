@@ -41,11 +41,11 @@ public class ContentObsHandler extends TextHandler {
 		obs = super.getObs(obs, view);
 		
 		ComplexData data = obs.getComplexData();
-		if (data==null || !(data.getData() instanceof char[])) {
+		if (data==null || !(data.getData() instanceof String)) {
 			throw new APIException("Unprocessable ComplexData found (obsId=" + obs.getObsId() + ")");
 		}
-		
-		String json = new String((char[])data.getData());
+
+		String json = (String)(data.getData());
 		Content content = new Gson().fromJson(json, Content.class);
 		obs.setComplexData(new ComplexData(content.getContentType(), content));
 		
