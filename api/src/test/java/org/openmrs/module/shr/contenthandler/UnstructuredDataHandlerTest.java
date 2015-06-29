@@ -153,13 +153,6 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 		
 		Encounter res = handler.saveContent(patient, providersByRole, type, content);
 		
-		//Workaround for the testing obs handler, see InMemoryComplexObsHandler#saveObs
-		for (Obs obs : res.getAllObs()) {
-			if (obs.isComplex()) {
-				InMemoryComplexObsHandler.store.put(obs.getObsId(), (Content)obs.getComplexData().getData());
-			}
-		}
-		
 		return res;
 	}
 	
@@ -167,23 +160,18 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 	 * An in-memory obs handler for testing.
 	 */
 	public static class InMemoryComplexObsHandler extends AbstractHandler implements ComplexObsHandler {
-		static Map<Integer, Content> store = new HashMap<Integer, Content>();
+		static Map<String, Content> store = new HashMap<String, Content>();
 
 		@Override
 		public Obs getObs(Obs obs, String view) {
-			Content c = store.get(obs.getObsId());
+			Content c = store.get(obs.getUuid());
 			obs.setComplexData(new ComplexData(c.getContentType(), c));
 			return obs;
 		}
 
-		//For some reason this method isn't being called during testing
-		//(saveObs is however being called correctly at runtime)
-		//As a work-around we manually add the content object to the store
-		//after saving an encounter [during a test]
 		@Override
 		public Obs saveObs(Obs obs) throws APIException {
-			store.put(obs.getObsId(), (Content)obs.getComplexData().getData());
-			obs.setComplexData(null);
+			store.put(obs.getUuid(), (Content)obs.getComplexData().getData());
 			return obs;
 		}
 		
