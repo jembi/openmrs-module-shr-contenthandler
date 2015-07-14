@@ -45,7 +45,7 @@ public interface ContentHandler {
 	 * @param content The encounter data
 	 * @return The created and saved encounter object
 	 */
-	Encounter saveContent(Patient patient, Map<EncounterRole, Set<Provider>> providersByRole, EncounterType encounterType, Content content);
+	Encounter saveContent(Patient patient, Map<EncounterRole, Set<Provider>> providersByRole, EncounterType encounterType, Content content) throws ContentHandlerException;
 
 	/**
 	 * Retrieve the content associated with the specified encounter uuid.
@@ -53,7 +53,7 @@ public interface ContentHandler {
 	 * @param contentId The unique content identifier that was used to save the content
 	 * @return The content in the content handler's format
 	 */
-	Content fetchContent(String contentId);
+	Content fetchContent(String contentId) throws ContentHandlerException;
 
 	/**
 	 * Create a clone of this handler.
