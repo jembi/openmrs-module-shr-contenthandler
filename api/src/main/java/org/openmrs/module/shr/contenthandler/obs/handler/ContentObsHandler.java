@@ -34,22 +34,21 @@ import com.google.gson.Gson;
 public class ContentObsHandler extends TextHandler {
 	
 	Log log = LogFactory.getLog(this.getClass());
-	
+
 
 	@Override
 	public Obs getObs(Obs obs, String view) {
 		obs = super.getObs(obs, view);
-		
+
 		ComplexData data = obs.getComplexData();
-        //TODO Add some smarter logic for this to work for 2.0+ versions of
-        //OpenMRS where the TextHandler sets the data as a String instead
-        if (data==null || !(data.getData() instanceof char[])) {
+		if (data==null || !(data.getData() instanceof String) || !(data.getData() instanceof char[])) {
 			throw new APIException("Unprocessable ComplexData found (obsId=" + obs.getObsId() + ")");
 		}
-        String json = new String((char[])data.getData());
+
+		String json = (data.getData() instanceof String) ? (String)(data.getData()) : new String((char[])data.getData());
 		Content content = new Gson().fromJson(json, Content.class);
 		obs.setComplexData(new ComplexData(content.getContentType(), content));
-		
+
 		return obs;
 	}
 
