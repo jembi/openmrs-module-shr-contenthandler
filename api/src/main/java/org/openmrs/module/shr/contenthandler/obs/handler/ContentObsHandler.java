@@ -41,7 +41,7 @@ public class ContentObsHandler extends TextHandler {
 		obs = super.getObs(obs, view);
 
 		ComplexData data = obs.getComplexData();
-		if (data==null || !(data.getData() instanceof String) || !(data.getData() instanceof char[])) {
+		if (data==null || (!(data.getData() instanceof String) && !(data.getData() instanceof char[]))) {
 			throw new APIException("Unprocessable ComplexData found (obsId=" + obs.getObsId() + ")");
 		}
 
