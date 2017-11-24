@@ -38,14 +38,15 @@ public interface ContentHandler {
 
 	/**
 	 * Parse and store clinical content for the specified patient.
-	 * 
+	 *
 	 * @param patient The patient associated with the content
 	 * @param providersByRole The clinical providers associated with this content mapped by their role
 	 * @param encounterType The encounter type
 	 * @param content The encounter data
+	 * @param encounter The encounter to be saved
 	 * @return The created and saved encounter object
 	 */
-	Encounter saveContent(Patient patient, Map<EncounterRole, Set<Provider>> providersByRole, EncounterType encounterType, Content content) throws ContentHandlerException;
+	Encounter saveContent(Patient patient, Map<EncounterRole, Set<Provider>> providersByRole, EncounterType encounterType, Content content, Encounter encounter) throws ContentHandlerException;
 
 	/**
 	 * Retrieve the content associated with the specified encounter uuid.

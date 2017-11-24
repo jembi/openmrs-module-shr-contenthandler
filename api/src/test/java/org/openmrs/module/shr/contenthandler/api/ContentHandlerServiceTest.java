@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
+import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
@@ -462,8 +463,8 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 	private class UnkownContentHandler implements ContentHandler {
 		@Override
 		public Encounter saveContent(Patient patient,
-				Map<EncounterRole, Set<Provider>> providersByRole,
-				EncounterType encounterType, Content content) {
+									 Map<EncounterRole, Set<Provider>> providersByRole,
+									 EncounterType encounterType, Content content, Encounter encounter) {
 			return null;
 		}
 
@@ -482,7 +483,7 @@ public class  ContentHandlerServiceTest extends BaseModuleContextSensitiveTest {
 		@Override
 		public Encounter saveContent(Patient patient,
 				Map<EncounterRole, Set<Provider>> providersByRole,
-				EncounterType encounterType, Content content) {
+				EncounterType encounterType, Content content, Encounter encounter) {
 			return null;
 		}
 

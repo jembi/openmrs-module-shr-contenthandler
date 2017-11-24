@@ -15,7 +15,7 @@
 
 	<dependencies>
 	
-		<!-- 
+		<!--
 		Add other dependencies from parent's pom:
 		<dependency>
 			<groupId>org.other.library</groupId> 

@@ -151,7 +151,7 @@ public class UnstructuredDataHandlerTest extends BaseModuleContextSensitiveTest 
 		providers.add(provider);
 		providersByRole.put(role, providers);
 		
-		Encounter res = handler.saveContent(patient, providersByRole, type, content);
+		Encounter res = handler.saveContent(patient, providersByRole, type, content, null);
 		
 		return res;
 	}
